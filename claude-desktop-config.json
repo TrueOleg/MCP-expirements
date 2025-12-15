@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "ollama": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-ollama"]
+    },
+    "mac-apps": {
+      "command": "python3",
+      "args": ["/Users/olegzaichkin/Documents/MCP/src/server.py"]
+    }
+  }
+}
+

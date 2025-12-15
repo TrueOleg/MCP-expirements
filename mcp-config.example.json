@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "mac-apps": {
+      "command": "node",
+      "args": ["/Users/olegzaichkin/Documents/MCP/dist/index.js"]
+    }
+  }
+}
+
