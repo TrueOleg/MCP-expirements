@@ -1,25 +1,25 @@
-# Настройка Ollama с MCP Mac Apps Server
+# Ollama Setup with MCP Mac Apps Server
 
-## ✅ Текущий статус
+## ✅ Current Status
 
-- ✅ Ollama установлен
-- ✅ Сервер Ollama запущен
-- ✅ Модель `llama3.2` загружена (2.0 GB)
-- ✅ Модель `deepseek-r1:8b` доступна (5.2 GB)
+- ✅ Ollama installed
+- ✅ Ollama server running
+- ✅ Model `llama3.2` loaded (2.0 GB)
+- ✅ Model `deepseek-r1:8b` available (5.2 GB)
 
-## 🚀 Быстрый старт
+## 🚀 Quick Start
 
-### Вариант 1: Использование через Claude Desktop
+### Option 1: Usage via Claude Desktop
 
-1. **Установите Claude Desktop** (если еще не установлен):
-   - Скачайте с https://claude.ai/download
+1. **Install Claude Desktop** (if not already installed):
+   - Download from https://claude.ai/download
 
-2. **Установите MCP сервер для Ollama**:
+2. **Install MCP Server for Ollama**:
    ```bash
    npx -y @modelcontextprotocol/create-server ollama-mcp
    ```
    
-   Или добавьте в конфигурацию Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+   Or add to Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json`):
    ```json
    {
      "mcpServers": {
@@ -35,60 +35,60 @@
    }
    ```
 
-3. **Перезапустите Claude Desktop**
+3. **Restart Claude Desktop**
 
-4. **Теперь Claude сможет**:
-   - Использовать локальные модели через Ollama
-   - Управлять приложениями на Mac через ваш MCP сервер
+4. **Now Claude can**:
+   - Use local models via Ollama
+   - Manage Mac applications through your MCP server
 
-### Вариант 2: Использование через API напрямую
+### Option 2: Direct API Usage
 
-Ollama предоставляет REST API на `http://localhost:11434`. Вы можете использовать его напрямую с любым клиентом, поддерживающим OpenAI-совместимый API.
+Ollama provides REST API at `http://localhost:11434`. You can use it directly with any client that supports OpenAI-compatible API.
 
-**Тестирование API:**
+**Testing API:**
 ```bash
 curl http://localhost:11434/api/generate -d '{
   "model": "llama3.2",
-  "prompt": "Привет! Как дела?",
+  "prompt": "Hello! How are you?",
   "stream": false
 }'
 ```
 
-## 📝 Доступные модели
+## 📝 Available Models
 
-Проверить список моделей:
+Check model list:
 ```bash
 ollama list
 ```
 
-Загрузить другие модели:
+Load other models:
 ```bash
-# Популярные модели
-ollama pull llama3.1:8b       # Более мощная версия
+# Popular models
+ollama pull llama3.1:8b       # More powerful version
 ollama pull mistral:7b        # Mistral AI
 ollama pull qwen2.5:7b        # Alibaba Qwen
-ollama pull codellama:7b      # Для программирования
-ollama pull phi3              # Легкая модель Microsoft
+ollama pull codellama:7b      # For programming
+ollama pull phi3              # Lightweight Microsoft model
 ```
 
-## 🔧 Управление Ollama
+## 🔧 Ollama Management
 
-**Запуск сервера:**
+**Start Server:**
 ```bash
 ollama serve
 ```
 
-**Остановка сервера:**
+**Stop Server:**
 ```bash
-# Нажмите Ctrl+C или найдите процесс и завершите его
+# Press Ctrl+C or find process and kill it
 ps aux | grep ollama
 kill <PID>
 ```
 
-**Автозапуск (macOS):**
-Ollama обычно запускается автоматически через LaunchAgent. Если нужно добавить в автозагрузку:
+**Auto-start (macOS):**
+Ollama usually starts automatically via LaunchAgent. If you need to add to autostart:
 ```bash
-# Создать LaunchAgent
+# Create LaunchAgent
 cat > ~/Library/LaunchAgents/com.ollama.server.plist << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -109,35 +109,35 @@ cat > ~/Library/LaunchAgents/com.ollama.server.plist << EOF
 </plist>
 EOF
 
-# Загрузить агент
+# Load agent
 launchctl load ~/Library/LaunchAgents/com.ollama.server.plist
 ```
 
-## 🎯 Примеры использования
+## 🎯 Usage Examples
 
-### Тест модели напрямую:
+### Test Model Directly:
 ```bash
-ollama run llama3.2 "Расскажи про MCP протокол"
+ollama run llama3.2 "Tell me about MCP protocol"
 ```
 
-### Использование через API с curl:
+### Usage via API with curl:
 ```bash
-# Простой запрос
+# Simple request
 curl http://localhost:11434/api/generate -d '{
   "model": "llama3.2",
-  "prompt": "Что такое Model Context Protocol?",
+  "prompt": "What is Model Context Protocol?",
   "stream": false
 }'
 
-# С стримингом
+# With streaming
 curl http://localhost:11434/api/generate -d '{
   "model": "llama3.2",
-  "prompt": "Привет!",
+  "prompt": "Hello!",
   "stream": true
 }'
 ```
 
-### Использование с Python:
+### Usage with Python:
 ```python
 import requests
 import json
@@ -146,7 +146,7 @@ response = requests.post(
     'http://localhost:11434/api/generate',
     json={
         'model': 'llama3.2',
-        'prompt': 'Открой Safari',
+        'prompt': 'Open Safari',
         'stream': False
     }
 )
@@ -154,31 +154,30 @@ response = requests.post(
 print(response.json()['response'])
 ```
 
-## 🔍 Проверка работы
+## 🔍 Verification
 
-Проверить, что сервер работает:
+Check that server is running:
 ```bash
 curl http://localhost:11434/api/tags
 ```
 
-Должен вернуть список моделей в формате JSON.
+Should return list of models in JSON format.
 
-## 💡 Советы
+## 💡 Tips
 
-1. **Производительность**: Модель `llama3.2` (2GB) работает быстро, но менее мощная. Для лучшего качества используйте `llama3.1:8b` или `deepseek-r1:8b`.
+1. **Performance**: Model `llama3.2` (2GB) works fast but is less powerful. For better quality, use `llama3.1:8b` or `deepseek-r1:8b`.
 
-2. **Память**: Убедитесь, что у вас достаточно RAM. Модели требуют:
+2. **Memory**: Make sure you have enough RAM. Models require:
    - `llama3.2`: ~2-4 GB RAM
    - `llama3.1:8b`: ~8-10 GB RAM
    - `deepseek-r1:8b`: ~10-12 GB RAM
 
-3. **Скорость**: На Mac с Apple Silicon (M1/M2/M3) модели работают значительно быстрее благодаря нейропроцессору.
+3. **Speed**: On Mac with Apple Silicon (M1/M2/M3), models work significantly faster thanks to the neural processor.
 
-4. **Приватность**: Все обработка происходит локально, данные никуда не отправляются.
+4. **Privacy**: All processing happens locally, data is not sent anywhere.
 
-## 📚 Полезные ссылки
+## 📚 Useful Links
 
-- [Ollama документация](https://ollama.ai/docs)
-- [Доступные модели](https://ollama.ai/library)
+- [Ollama Documentation](https://ollama.ai/docs)
+- [Available Models](https://ollama.ai/library)
 - [Ollama GitHub](https://github.com/ollama/ollama)
-

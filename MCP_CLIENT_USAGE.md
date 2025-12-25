@@ -1,154 +1,153 @@
-# Использование MCP клиента с Ollama
+# Using MCP Client with Ollama
 
-## 🎉 Что это?
+## 🎉 What is This?
 
-`mcp_client.py` - простой Python клиент, который объединяет Ollama (локальные LLM) с MCP инструментами для управления приложениями Mac.
+`mcp_client.py` - a simple Python client that combines Ollama (local LLMs) with MCP tools for managing Mac applications.
 
-**Как это работает:**
-1. Вы задаете вопрос на естественном языке
-2. Ollama определяет, какой MCP инструмент нужно использовать
-3. Клиент вызывает соответствующий инструмент
-4. Результат возвращается вам
+**How it works:**
+1. You ask a question in natural language
+2. Ollama determines which MCP tool to use
+3. Client calls the appropriate tool
+4. Result is returned to you
 
-## 🚀 Быстрый старт
+## 🚀 Quick Start
 
-### 1. Убедитесь, что все запущено
+### 1. Make Sure Everything is Running
 
 ```bash
-# Ollama должен быть запущен
+# Ollama should be running
 ollama serve
 
-# MCP сервер должен быть собран
+# MCP server should be built
 npm run build
 ```
 
-### 2. Используйте клиент
+### 2. Use the Client
 
 ```bash
-# Простой запрос
-python3 mcp_client.py "Открой Calculator"
+# Simple request
+python3 mcp_client.py "Open Calculator"
 
-# Или интерактивный режим
+# Or interactive mode
 python3 mcp_client.py
-# Затем введите запрос
+# Then enter request
 ```
 
-## 📝 Примеры использования
+## 📝 Usage Examples
 
-### Управление приложениями
+### Application Management
 
 ```bash
-# Открыть приложение
-python3 mcp_client.py "Открой Safari"
+# Open application
+python3 mcp_client.py "Open Safari"
 
-# Закрыть приложение
-python3 mcp_client.py "Закрой Calculator"
+# Close application
+python3 mcp_client.py "Close Calculator"
 
-# Список запущенных приложений
-python3 mcp_client.py "Какие приложения сейчас запущены?"
+# List running applications
+python3 mcp_client.py "What applications are currently running?"
 
-# Открыть файл в приложении
-python3 mcp_client.py "Открой файл ~/Documents/test.txt в TextEdit"
+# Open file in application
+python3 mcp_client.py "Open file ~/Documents/test.txt in TextEdit"
 ```
 
-### Использование Ollama инструментов
+### Using Ollama Tools
 
 ```bash
-# Генерация через Ollama
-python3 mcp_client.py "Используй Ollama для объяснения кода"
+# Generate via Ollama
+python3 mcp_client.py "Use Ollama to explain this code"
 
-# Список моделей
-python3 mcp_client.py "Покажи список моделей Ollama"
+# List models
+python3 mcp_client.py "Show list of Ollama models"
 ```
 
-### Комбинированные запросы
+### Combined Requests
 
-Вы можете комбинировать запросы, хотя клиент пока обрабатывает один инструмент за раз.
+You can combine requests, though the client currently processes one tool at a time.
 
-## ⚙️ Настройка
+## ⚙️ Configuration
 
-### Изменение модели Ollama
+### Changing Ollama Model
 
-В файле `mcp_client.py` измените:
+In `mcp_client.py` file, change:
 
 ```python
-OLLAMA_MODEL = "llama3.2"  # Измените на свою модель
+OLLAMA_MODEL = "llama3.2"  # Change to your model
 ```
 
-### Изменение URL Ollama
+### Changing Ollama URL
 
 ```python
-OLLAMA_API_URL = "http://localhost:11434"  # Или другой адрес
+OLLAMA_API_URL = "http://localhost:11434"  # Or other address
 ```
 
-## 🔧 Как это работает технически
+## 🔧 How It Works Technically
 
-1. **Получение списка инструментов**: Клиент сначала запрашивает у MCP сервера список доступных инструментов
+1. **Getting Tool List**: Client first requests list of available tools from MCP server
 
-2. **Создание промпта**: Формируется системный промпт для Ollama с описанием всех доступных инструментов
+2. **Creating Prompt**: System prompt is formed for Ollama with description of all available tools
 
-3. **Запрос к Ollama**: Отправляется запрос с описанием инструментов и пользовательским вопросом
+3. **Querying Ollama**: Request is sent with tool descriptions and user question
 
-4. **Парсинг ответа**: Ответ от Ollama парсится для поиска JSON с указанием инструмента и аргументов
+4. **Parsing Response**: Response from Ollama is parsed to find JSON with tool name and arguments
 
-5. **Вызов инструмента**: Если найден JSON с инструментом, клиент вызывает соответствующий MCP инструмент через JSON-RPC
+5. **Calling Tool**: If JSON with tool is found, client calls the appropriate MCP tool via JSON-RPC
 
-6. **Возврат результата**: Результат выполнения инструмента возвращается пользователю
+6. **Returning Result**: Tool execution result is returned to user
 
-## 🐛 Устранение проблем
+## 🐛 Troubleshooting
 
-### Ошибка: "Не удалось подключиться к Ollama"
+### Error: "Failed to Connect to Ollama"
 
-**Решение:**
+**Solution:**
 ```bash
-# Запустите Ollama сервер
+# Start Ollama server
 ollama serve
 ```
 
-### Ошибка: "Нет ответа от MCP сервера"
+### Error: "No Response from MCP Server"
 
-**Решение:**
+**Solution:**
 ```bash
-# Убедитесь, что сервер собран
+# Make sure server is built
 npm run build
 
-# Проверьте, что файл существует
+# Check that file exists
 ls -la dist/index.js
 ```
 
-### Модель не понимает запрос
+### Model Doesn't Understand Request
 
-Попробуйте более явный запрос:
-- Вместо "Открой калькулятор" → "Открой приложение Calculator"
-- Вместо "Закрой браузер" → "Закрой приложение Safari"
+Try a more explicit request:
+- Instead of "Open calculator" → "Open application Calculator"
+- Instead of "Close browser" → "Close application Safari"
 
-### Ollama возвращает текст вместо JSON
+### Ollama Returns Text Instead of JSON
 
-Это нормально для некоторых запросов. Клиент вернет текстовый ответ от Ollama, если не удалось определить инструмент.
+This is normal for some requests. Client will return text response from Ollama if it couldn't determine a tool.
 
-## 💡 Рекомендации
+## 💡 Recommendations
 
-1. **Используйте точные названия приложений**: "Calculator", "Safari", "TextEdit" (с большой буквы)
+1. **Use Exact Application Names**: "Calculator", "Safari", "TextEdit" (with capital letter)
 
-2. **Для сложных задач используйте Claude Desktop**: Этот клиент - упрощенная версия. Для более сложных задач лучше использовать полноценный MCP клиент (Claude Desktop)
+2. **For Complex Tasks Use Claude Desktop**: This client is a simplified version. For more complex tasks, it's better to use a full MCP client (Claude Desktop)
 
-3. **Проверяйте список инструментов**: Клиент автоматически получает список доступных инструментов при каждом запуске
+3. **Check Tool List**: Client automatically gets list of available tools on each startup
 
-## 🆚 Сравнение с Claude Desktop
+## 🆚 Comparison with Claude Desktop
 
-| Возможность | mcp_client.py | Claude Desktop |
-|------------|---------------|----------------|
-| Простота использования | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
-| Точность понимания | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Поддержка сложных запросов | ⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Локальная работа | ⭐⭐⭐⭐⭐ | ⭐⭐ |
-| Несколько инструментов за раз | ❌ | ✅ |
-| Графический интерфейс | ❌ | ✅ |
+| Feature | mcp_client.py | Claude Desktop |
+|---------|---------------|----------------|
+| Ease of Use | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ |
+| Understanding Accuracy | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Complex Request Support | ⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Local Operation | ⭐⭐⭐⭐⭐ | ⭐⭐ |
+| Multiple Tools at Once | ❌ | ✅ |
+| Graphical Interface | ❌ | ✅ |
 
-## 📚 Следующие шаги
+## 📚 Next Steps
 
-Для более продвинутого использования рекомендуется:
-1. Настроить Claude Desktop с MCP серверами (см. README.md)
-2. Использовать несколько MCP серверов одновременно
-3. Создать собственный более сложный клиент с поддержкой цепочек инструментов
-
+For more advanced usage, it's recommended to:
+1. Configure Claude Desktop with MCP servers (see README.md)
+2. Use multiple MCP servers simultaneously
+3. Create your own more complex client with support for tool chains

@@ -1,42 +1,42 @@
-# MCP Server - Python версия ✅
+# MCP Server - Python Version ✅
 
-## ✅ Статус
+## ✅ Status
 
-MCP сервер успешно переписан на Python! Все функции работают идентично TypeScript версии.
+MCP server successfully rewritten in Python! All features work identically to the TypeScript version.
 
-## 🚀 Быстрый старт
+## 🚀 Quick Start
 
-### Установка
+### Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Запуск
+### Running
 
 ```bash
 python3 src/server.py
 ```
 
-## 📋 Что работает
+## 📋 What Works
 
-✅ Все инструменты сохранены:
-- Управление приложениями Mac
-- Работа с Ollama
-- Работа с MongoDB
-- AppleScript автоматизация
+✅ All tools preserved:
+- Mac application management
+- Ollama integration
+- MongoDB integration
+- AppleScript automation
 
-## 🔄 Использование
+## 🔄 Usage
 
-### С клиентами
+### With Clients
 
-Все клиенты обновлены:
-- `mcp_client.py` - текстовый клиент
-- `voice_client.py` - голосовой клиент
+All clients updated:
+- `mcp_client.py` - text client
+- `voice_client.py` - voice client
 
-### С Claude Desktop
+### With Claude Desktop
 
-Обновите конфигурацию:
+Update configuration:
 ```json
 {
   "mcpServers": {
@@ -48,8 +48,7 @@ python3 src/server.py
 }
 ```
 
-## 📚 Документация
+## 📚 Documentation
 
-- Основная: [README.md](./README.md)
-- Миграция: [PYTHON_MIGRATION.md](./PYTHON_MIGRATION.md)
-
+- Main: [README.md](./README.md)
+- Migration: [PYTHON_MIGRATION.md](./PYTHON_MIGRATION.md)

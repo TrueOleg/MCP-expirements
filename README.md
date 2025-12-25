@@ -1,49 +1,49 @@
 # MCP Mac Apps Server
 
-MCP сервер для управления приложениями на macOS через LLM. Позволяет запускать приложения, управлять ими через AppleScript и получать информацию о запущенных приложениях.
+MCP server for managing macOS applications through LLM. Allows launching applications, managing them via AppleScript, and getting information about running applications.
 
-🎤 **Голосовое управление**: Используйте [voice_client.py](./voice_client.py) для управления приложениями голосом! См. [VOICE_SETUP.md](./VOICE_SETUP.md)
+🎤 **Voice Control**: Use [voice_client.py](./voice_client.py) to control applications by voice! See [VOICE_SETUP.md](./VOICE_SETUP.md)
 
-## Возможности
+## Features
 
-- 🚀 **Запуск приложений** - открытие любых приложений на Mac
-- 📋 **Список запущенных приложений** - получение списка активных приложений
-- 🤖 **AppleScript автоматизация** - выполнение команд в приложениях
-- ❌ **Закрытие приложений** - завершение работы приложений
-- 📂 **Открытие файлов** - открытие файлов в конкретных приложениях
+- 🚀 **Launch Applications** - open any applications on Mac
+- 📋 **List Running Applications** - get list of active applications
+- 🤖 **AppleScript Automation** - execute commands in applications
+- ❌ **Close Applications** - quit applications
+- 📂 **Open Files** - open files in specific applications
 
-## Установка
+## Installation
 
-### Python версия (рекомендуется)
+### Python Version (Recommended)
 
-1. Убедитесь, что у вас установлен Python 3.7+
+1. Make sure you have Python 3.7+ installed
 
-2. Установите зависимости:
+2. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Сервер готов к использованию! Не требует компиляции.
+3. Server is ready to use! No compilation required.
 
-### TypeScript версия (альтернатива)
+### TypeScript Version (Alternative)
 
-1. Убедитесь, что у вас установлены Node.js (v18+) и npm
+1. Make sure you have Node.js (v18+) and npm installed
 
-2. Установите зависимости:
+2. Install dependencies:
 ```bash
 npm install
 ```
 
-3. Соберите проект:
+3. Build the project:
 ```bash
 npm run build
 ```
 
-## Настройка для использования с MCP клиентами
+## Configuration for Use with MCP Clients
 
 ### Claude Desktop
 
-Добавьте конфигурацию в файл настроек MCP клиента. Для Claude Desktop это обычно файл конфигурации MCP:
+Add configuration to the MCP client settings file. For Claude Desktop this is usually the MCP configuration file:
 
 `~/Library/Application Support/Claude/claude_desktop_config.json`
 
@@ -58,7 +58,7 @@ npm run build
 }
 ```
 
-Или для разработки с использованием tsx:
+Or for development using tsx:
 
 ```json
 {
@@ -72,113 +72,112 @@ npm run build
 }
 ```
 
-### Другие LLM и клиенты
+### Other LLMs and Clients
 
-**Доступные варианты**:
-- **Claude Desktop** (рекомендуется) - полная поддержка MCP
-- **Ollama** ✅ - локальные модели (установлен, модели загружены) - см. [OLLAMA_SETUP.md](./OLLAMA_SETUP.md)
-- **LM Studio** - графический интерфейс для локальных LLM
-- **DeepSeek** - см. [DEEPSEEK_SETUP.md](./DEEPSEEK_SETUP.md)
+**Available options**:
+- **Claude Desktop** (recommended) - full MCP support
+- **Ollama** ✅ - local models (installed, models loaded) - see [OLLAMA_SETUP.md](./OLLAMA_SETUP.md)
+- **LM Studio** - graphical interface for local LLMs
+- **DeepSeek** - see [DEEPSEEK_SETUP.md](./DEEPSEEK_SETUP.md)
 
-📖 **Подробный список совместимых LLM и инструкции**: [COMPATIBLE_LLM.md](./COMPATIBLE_LLM.md)
+📖 **Detailed list of compatible LLMs and instructions**: [COMPATIBLE_LLM.md](./COMPATIBLE_LLM.md)
 
-## Использование
+## Usage
 
-После настройки, LLM сможет использовать следующие инструменты:
+After configuration, the LLM will be able to use the following tools:
 
-### 1. Открытие приложения
+### 1. Open Application
 ```
-Открой Safari
-```
-
-### 2. Получение списка приложений
-```
-Какие приложения сейчас запущены?
+Open Safari
 ```
 
-### 3. Выполнение AppleScript
+### 2. Get List of Applications
 ```
-В Safari открой новую вкладку
-```
-
-### 4. Закрытие приложения
-```
-Закрой Calculator
+What applications are currently running?
 ```
 
-### 5. Открытие файла
+### 3. Execute AppleScript
 ```
-Открой файл ~/Documents/example.txt в TextEdit
+In Safari, open a new tab
 ```
 
-## Доступные инструменты
+### 4. Close Application
+```
+Close Calculator
+```
+
+### 5. Open File
+```
+Open file ~/Documents/example.txt in TextEdit
+```
+
+## Available Tools
 
 ### `open_application`
-Открывает приложение по имени.
+Opens an application by name.
 
-**Параметры:**
-- `appName` (string) - имя приложения (например, "Safari", "Calculator")
+**Parameters:**
+- `appName` (string) - application name (e.g., "Safari", "Calculator")
 
 ### `get_running_applications`
-Возвращает список всех запущенных приложений.
+Returns a list of all running applications.
 
 ### `run_applescript`
-Выполняет AppleScript команду в указанном приложении.
+Executes an AppleScript command in the specified application.
 
-**Параметры:**
-- `appName` (string) - имя приложения
-- `script` (string) - AppleScript команда
+**Parameters:**
+- `appName` (string) - application name
+- `script` (string) - AppleScript command
 
-**Примеры AppleScript:**
-- Safari: `make new document` - создать новую вкладку
-- Finder: `open folder "Documents"` - открыть папку
-- TextEdit: `make new document` - создать новый документ
+**AppleScript Examples:**
+- Safari: `make new document` - create a new tab
+- Finder: `open folder "Documents"` - open a folder
+- TextEdit: `make new document` - create a new document
 
 ### `quit_application`
-Закрывает указанное приложение.
+Closes the specified application.
 
-**Параметры:**
-- `appName` (string) - имя приложения для закрытия
+**Parameters:**
+- `appName` (string) - application name to close
 
 ### `open_file_with_app`
-Открывает файл или URL в указанном приложении.
+Opens a file or URL in the specified application.
 
-**Параметры:**
-- `path` (string) - путь к файлу или URL
-- `appName` (string) - имя приложения
+**Parameters:**
+- `path` (string) - path to file or URL
+- `appName` (string) - application name
 
-## Тестирование
+## Testing
 
-Для проверки работы сервера:
+To test the server:
 
 ```bash
 node test-mcp-server.js
 ```
 
-Или протестируйте вручную:
+Or test manually:
 
 ```bash
 npm run build
 npm start
 ```
 
-## Разработка
+## Development
 
-Для разработки с автоматической перезагрузкой:
+For development with auto-reload:
 
 ```bash
 npm run dev
 ```
 
-## Безопасность
+## Security
 
-⚠️ **Внимание:** Этот сервер позволяет выполнять команды на вашей системе. Используйте его только с доверенными LLM клиентами и в безопасной среде.
+⚠️ **Warning:** This server allows executing commands on your system. Use it only with trusted LLM clients and in a secure environment.
 
-Для работы на macOS может потребоваться разрешение на доступ к управлению другими приложениями:
-- Системные настройки → Конфиденциальность и безопасность → Управление компьютером
-- Разрешите доступ для Terminal/Node.js
+For macOS, you may need permission to control other applications:
+- System Settings → Privacy & Security → Automation
+- Allow access for Terminal/Node.js
 
-## Лицензия
+## License
 
 MIT
-

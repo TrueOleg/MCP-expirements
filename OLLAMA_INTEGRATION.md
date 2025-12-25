@@ -1,55 +1,55 @@
-# Интеграция Ollama в MCP Mac Apps Server
+# Ollama Integration in MCP Mac Apps Server
 
-## ✅ Что добавлено
+## ✅ What's Added
 
-В MCP сервер добавлена интеграция с Ollama API, что позволяет использовать локальные LLM модели прямо из MCP инструментов.
+Ollama API integration has been added to the MCP server, allowing you to use local LLM models directly from MCP tools.
 
-### Новые инструменты:
+### New Tools:
 
-1. **`ollama_generate`** - Генерация ответов используя локальные модели Ollama
-2. **`ollama_list_models`** - Получение списка доступных моделей Ollama
+1. **`ollama_generate`** - Generate responses using local Ollama models
+2. **`ollama_list_models`** - Get list of available Ollama models
 
-## 🚀 Использование
+## 🚀 Usage
 
-### 1. Убедитесь, что Ollama запущен
+### 1. Make Sure Ollama is Running
 
 ```bash
-# Проверьте, что Ollama сервер работает
+# Check that Ollama server is running
 curl http://localhost:11434/api/tags
 
-# Если не запущен, запустите:
+# If not running, start it:
 ollama serve
 ```
 
-### 2. Пересоберите MCP сервер
+### 2. Rebuild MCP Server
 
 ```bash
 npm run build
 ```
 
-### 3. Использование через LLM клиент
+### 3. Usage via LLM Client
 
-После настройки в Claude Desktop или другом MCP клиенте, вы можете использовать новые инструменты:
+After configuring in Claude Desktop or another MCP client, you can use the new tools:
 
-**Примеры запросов:**
-- "Используй Ollama для объяснения этого кода"
-- "Покажи список доступных моделей Ollama"
-- "Сгенерируй ответ используя llama3.2 модель"
+**Example Requests:**
+- "Use Ollama to explain this code"
+- "Show list of available Ollama models"
+- "Generate response using llama3.2 model"
 
-## 📋 Параметры инструментов
+## 📋 Tool Parameters
 
 ### `ollama_generate`
 
-**Параметры:**
-- `prompt` (обязательный) - Запрос для модели
-- `model` (опциональный) - Название модели (по умолчанию: "llama3.2")
+**Parameters:**
+- `prompt` (required) - Prompt for the model
+- `model` (optional) - Model name (default: "llama3.2")
 
-**Пример использования:**
+**Usage Example:**
 ```json
 {
   "name": "ollama_generate",
   "arguments": {
-    "prompt": "Объясни, что такое MCP протокол",
+    "prompt": "Explain what MCP protocol is",
     "model": "llama3.2"
   }
 }
@@ -57,98 +57,97 @@ npm run build
 
 ### `ollama_list_models`
 
-**Параметры:** нет
+**Parameters:** none
 
-**Возвращает:** Список доступных моделей с размерами
+**Returns:** List of available models with sizes
 
-## ⚙️ Настройка
+## ⚙️ Configuration
 
-### Изменение URL Ollama сервера
+### Changing Ollama Server URL
 
-По умолчанию используется `http://localhost:11434`. 
+By default, `http://localhost:11434` is used.
 
-Чтобы изменить URL, установите переменную окружения:
+To change URL, set environment variable:
 ```bash
 export OLLAMA_API_URL=http://your-ollama-server:11434
 ```
 
-Или измените в коде:
+Or change in code:
 ```typescript
 const OLLAMA_API_URL = "http://your-custom-url:11434";
 ```
 
-## 🔧 Примеры использования
+## 🔧 Usage Examples
 
-### Через Claude Desktop
+### Via Claude Desktop
 
-После настройки MCP сервера, просто спросите Claude:
-
-```
-"Используй Ollama для генерации ответа на вопрос: что такое искусственный интеллект?"
-```
-
-Claude автоматически использует инструмент `ollama_generate`.
-
-### Комбинирование с другими инструментами
-
-Вы можете комбинировать Ollama с инструментами управления приложениями:
+After configuring MCP server, simply ask Claude:
 
 ```
-"Используй Ollama для анализа содержимого файла ~/Documents/report.txt, 
-а затем открой TextEdit чтобы показать результаты"
+"Use Ollama to generate response to question: what is artificial intelligence?"
 ```
 
-## 📊 Доступные модели
+Claude will automatically use the `ollama_generate` tool.
 
-Проверить список моделей через инструмент `ollama_list_models` или вручную:
+### Combining with Other Tools
+
+You can combine Ollama with application management tools:
+
+```
+"Use Ollama to analyze contents of file ~/Documents/report.txt, 
+then open TextEdit to show results"
+```
+
+## 📊 Available Models
+
+Check list of models via `ollama_list_models` tool or manually:
 
 ```bash
 ollama list
 ```
 
-Популярные модели:
-- `llama3.2` - быстрая, легкая модель (2GB)
-- `llama3.1:8b` - более мощная версия (4.7GB)
-- `deepseek-r1:8b` - для рассуждений (5.2GB)
-- `mistral:7b` - Mistral AI модель
+Popular models:
+- `llama3.2` - fast, lightweight model (2GB)
+- `llama3.1:8b` - more powerful version (4.7GB)
+- `deepseek-r1:8b` - for reasoning (5.2GB)
+- `mistral:7b` - Mistral AI model
 - `qwen2.5:7b` - Alibaba Qwen
 
-## 🛠️ Устранение проблем
+## 🛠️ Troubleshooting
 
-### Ошибка: "Не удалось подключиться к Ollama серверу"
+### Error: "Failed to Connect to Ollama Server"
 
-**Решение:**
-1. Убедитесь, что Ollama запущен: `ollama serve`
-2. Проверьте, что порт 11434 доступен: `curl http://localhost:11434/api/tags`
-3. Проверьте переменную окружения `OLLAMA_API_URL`
+**Solution:**
+1. Make sure Ollama is running: `ollama serve`
+2. Check that port 11434 is accessible: `curl http://localhost:11434/api/tags`
+3. Check `OLLAMA_API_URL` environment variable
 
-### Ошибка: "Модель не найдена"
+### Error: "Model Not Found"
 
-**Решение:**
-1. Загрузите модель: `ollama pull llama3.2`
-2. Проверьте список моделей: `ollama list`
+**Solution:**
+1. Load model: `ollama pull llama3.2`
+2. Check model list: `ollama list`
 
-### Медленная генерация
+### Slow Generation
 
-**Причины:**
-- Модель слишком большая для вашего железа
-- Недостаточно RAM
-- CPU вместо GPU
+**Causes:**
+- Model too large for your hardware
+- Insufficient RAM
+- CPU instead of GPU
 
-**Решения:**
-- Используйте меньшую модель (например, `llama3.2` вместо `llama3.1:8b`)
-- Закройте другие приложения для освобождения памяти
-- На Mac с Apple Silicon используйте Metal для ускорения
+**Solutions:**
+- Use smaller model (e.g., `llama3.2` instead of `llama3.1:8b`)
+- Close other applications to free memory
+- On Mac with Apple Silicon, use Metal for acceleration
 
-## 🔐 Безопасность
+## 🔐 Security
 
-- Ollama API работает локально и не отправляет данные в интернет
-- Все запросы обрабатываются на вашем компьютере
-- Убедитесь, что Ollama сервер не доступен извне (по умолчанию только localhost)
+- Ollama API works locally and doesn't send data to internet
+- All requests are processed on your computer
+- Make sure Ollama server is not accessible externally (localhost only by default)
 
-## 📚 Дополнительная информация
+## 📚 Additional Information
 
-- [Ollama документация](https://ollama.ai/docs)
+- [Ollama Documentation](https://ollama.ai/docs)
 - [Ollama API](https://github.com/ollama/ollama/blob/main/docs/api.md)
-- [Список моделей Ollama](https://ollama.ai/library)
-
+- [Ollama Model List](https://ollama.ai/library)

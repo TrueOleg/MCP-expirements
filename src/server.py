@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-MCP сервер для управления приложениями Mac
-Переписанная версия на Python
-Использует JSON-RPC протокол через stdio
+MCP server for managing Mac applications
+Python rewritten version
+Uses JSON-RPC protocol via stdio
 """
 
 import asyncio
@@ -11,6 +11,7 @@ import os
 import subprocess
 import sys
 from typing import Any, Dict, List, Optional
+from urllib.parse import quote_plus
 
 import requests
 from pymongo import MongoClient
@@ -22,7 +23,7 @@ MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
 
 
 def exec_command(command: str) -> tuple[str, str]:
-    """Выполняет shell команду и возвращает stdout и stderr"""
+    """Executes shell command and returns stdout and stderr"""
     try:
         result = subprocess.run(
             command,
@@ -33,23 +34,23 @@ def exec_command(command: str) -> tuple[str, str]:
         )
         return result.stdout, result.stderr
     except subprocess.TimeoutExpired:
-        return "", "Тайм-аут выполнения команды"
+        return "", "Command execution timeout"
     except Exception as e:
         return "", str(e)
 
 
 def get_tools() -> List[Dict[str, Any]]:
-    """Возвращает список всех доступных инструментов"""
+    """Returns list of all available tools"""
     return [
         {
             "name": "open_application",
-            "description": "Открывает приложение на Mac по имени. Примеры: 'Safari', 'Finder', 'TextEdit', 'Calculator'",
+            "description": "Opens an application on Mac by name. Examples: 'Safari', 'Finder', 'TextEdit', 'Calculator'",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "appName": {
                         "type": "string",
-                        "description": "Имя приложения для запуска (например, 'Safari', 'Calculator')",
+                        "description": "Application name to launch (e.g., 'Safari', 'Calculator')",
                     },
                 },
                 "required": ["appName"],
@@ -57,7 +58,7 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "get_running_applications",
-            "description": "Получает список всех запущенных приложений на Mac",
+            "description": "Gets list of all running applications on Mac",
             "inputSchema": {
                 "type": "object",
                 "properties": {},
@@ -65,17 +66,17 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "run_applescript",
-            "description": "Выполняет AppleScript команду в указанном приложении. Полезно для автоматизации действий в приложениях",
+            "description": "Executes AppleScript command in specified application. Useful for automating actions in applications",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "appName": {
                         "type": "string",
-                        "description": "Имя приложения (например, 'Safari', 'Finder')",
+                        "description": "Application name (e.g., 'Safari', 'Finder')",
                     },
                     "script": {
                         "type": "string",
-                        "description": "AppleScript команда для выполнения",
+                        "description": "AppleScript command to execute",
                     },
                 },
                 "required": ["appName", "script"],
@@ -83,13 +84,13 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "quit_application",
-            "description": "Закрывает указанное приложение",
+            "description": "Closes specified application",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "appName": {
                         "type": "string",
-                        "description": "Имя приложения для закрытия",
+                        "description": "Application name to close",
                     },
                 },
                 "required": ["appName"],
@@ -97,17 +98,17 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "open_file_with_app",
-            "description": "Открывает файл или URL в указанном приложении",
+            "description": "Opens file or URL in specified application",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "path": {
                         "type": "string",
-                        "description": "Путь к файлу или URL",
+                        "description": "Path to file or URL",
                     },
                     "appName": {
                         "type": "string",
-                        "description": "Имя приложения для открытия файла",
+                        "description": "Application name to open file with",
                     },
                 },
                 "required": ["path", "appName"],
@@ -115,18 +116,18 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "ollama_generate",
-            "description": "Генерирует ответ используя локальную модель Ollama. Используйте для задач, требующих AI обработки текста",
+            "description": "Generates response using local Ollama model. Use for tasks requiring AI text processing",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "model": {
                         "type": "string",
-                        "description": "Название модели Ollama (например, 'llama3.2', 'deepseek-r1:8b'). По умолчанию 'llama3.2'",
+                        "description": "Ollama model name (e.g., 'llama3.2', 'deepseek-r1:8b'). Default 'llama3.2'",
                         "default": "llama3.2",
                     },
                     "prompt": {
                         "type": "string",
-                        "description": "Запрос для модели",
+                        "description": "Prompt for the model",
                     },
                 },
                 "required": ["prompt"],
@@ -134,7 +135,7 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "ollama_list_models",
-            "description": "Получает список доступных моделей Ollama",
+            "description": "Gets list of available Ollama models",
             "inputSchema": {
                 "type": "object",
                 "properties": {},
@@ -142,13 +143,13 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "mongodb_create_database",
-            "description": "Создает новую базу данных в MongoDB",
+            "description": "Creates new database in MongoDB",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "databaseName": {
                         "type": "string",
-                        "description": "Имя базы данных",
+                        "description": "Database name",
                     },
                 },
                 "required": ["databaseName"],
@@ -156,7 +157,7 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "mongodb_list_databases",
-            "description": "Получает список всех баз данных в MongoDB",
+            "description": "Gets list of all databases in MongoDB",
             "inputSchema": {
                 "type": "object",
                 "properties": {},
@@ -164,17 +165,17 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "mongodb_create_collection",
-            "description": "Создает новую коллекцию в указанной базе данных",
+            "description": "Creates new collection in specified database",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "databaseName": {
                         "type": "string",
-                        "description": "Имя базы данных",
+                        "description": "Database name",
                     },
                     "collectionName": {
                         "type": "string",
-                        "description": "Имя коллекции",
+                        "description": "Collection name",
                     },
                 },
                 "required": ["databaseName", "collectionName"],
@@ -182,13 +183,13 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "mongodb_list_collections",
-            "description": "Получает список коллекций в указанной базе данных",
+            "description": "Gets list of collections in specified database",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "databaseName": {
                         "type": "string",
-                        "description": "Имя базы данных",
+                        "description": "Database name",
                     },
                 },
                 "required": ["databaseName"],
@@ -196,17 +197,17 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "mongodb_delete_collection",
-            "description": "Удаляет коллекцию из базы данных",
+            "description": "Deletes collection from database",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "databaseName": {
                         "type": "string",
-                        "description": "Имя базы данных",
+                        "description": "Database name",
                     },
                     "collectionName": {
                         "type": "string",
-                        "description": "Имя коллекции для удаления",
+                        "description": "Collection name to delete",
                     },
                 },
                 "required": ["databaseName", "collectionName"],
@@ -214,21 +215,21 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "mongodb_insert_document",
-            "description": "Вставляет документ в коллекцию",
+            "description": "Inserts document into collection",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "databaseName": {
                         "type": "string",
-                        "description": "Имя базы данных",
+                        "description": "Database name",
                     },
                     "collectionName": {
                         "type": "string",
-                        "description": "Имя коллекции",
+                        "description": "Collection name",
                     },
                     "document": {
                         "type": "string",
-                        "description": "JSON строка с документом для вставки",
+                        "description": "JSON string with document to insert",
                     },
                 },
                 "required": ["databaseName", "collectionName", "document"],
@@ -236,25 +237,25 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "mongodb_find_documents",
-            "description": "Находит документы в коллекции",
+            "description": "Finds documents in collection",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "databaseName": {
                         "type": "string",
-                        "description": "Имя базы данных",
+                        "description": "Database name",
                     },
                     "collectionName": {
                         "type": "string",
-                        "description": "Имя коллекции",
+                        "description": "Collection name",
                     },
                     "filter": {
                         "type": "string",
-                        "description": "JSON строка с фильтром для поиска (необязательно)",
+                        "description": "JSON string with search filter (optional)",
                     },
                     "limit": {
                         "type": "number",
-                        "description": "Максимальное количество документов (по умолчанию 100)",
+                        "description": "Maximum number of documents (default 100)",
                     },
                 },
                 "required": ["databaseName", "collectionName"],
@@ -262,79 +263,109 @@ def get_tools() -> List[Dict[str, Any]]:
         },
         {
             "name": "mongodb_delete_document",
-            "description": "Удаляет документ(ы) из коллекции по фильтру",
+            "description": "Deletes document(s) from collection by filter",
             "inputSchema": {
                 "type": "object",
                 "properties": {
                     "databaseName": {
                         "type": "string",
-                        "description": "Имя базы данных",
+                        "description": "Database name",
                     },
                     "collectionName": {
                         "type": "string",
-                        "description": "Имя коллекции",
+                        "description": "Collection name",
                     },
                     "filter": {
                         "type": "string",
-                        "description": "JSON строка с фильтром для удаления",
+                        "description": "JSON string with deletion filter",
                     },
                 },
                 "required": ["databaseName", "collectionName", "filter"],
             },
         },
+        {
+            "name": "search_google_in_safari",
+            "description": "Performs Google search through Safari browser",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query for Google",
+                    },
+                },
+                "required": ["query"],
+            },
+        },
     ]
 
 
-# Реализация инструментов для работы с приложениями Mac
+# Implementation of tools for working with Mac applications
 def open_application(app_name: str) -> str:
-    """Открывает приложение по имени"""
+    """Opens application by name"""
     stdout, stderr = exec_command(f'open -a "{app_name}"')
     if stderr:
-        raise Exception(f'Не удалось запустить приложение "{app_name}": {stderr}')
-    return f'Приложение "{app_name}" успешно запущено'
+        raise Exception(f'Failed to launch application "{app_name}": {stderr}')
+    return f'Application "{app_name}" successfully launched'
+
+
+def search_google_in_safari(query: str) -> str:
+    """Performs Google search through Safari"""
+    if not query:
+        raise Exception("Search query cannot be empty")
+    
+    # Convert to string and encode search query for URL
+    query_str = str(query)
+    encoded_query = quote_plus(query_str)
+    google_url = f"https://www.google.com/search?q={encoded_query}"
+    
+    stdout, stderr = exec_command(f'open -a Safari "{google_url}"')
+    if stderr:
+        raise Exception(f'Failed to open search in Safari: {stderr}')
+    return f'Search "{query_str}" opened in Safari'
 
 
 def get_running_applications() -> str:
-    """Получает список запущенных приложений"""
+    """Gets list of running applications"""
     apple_script = 'tell application "System Events" to get name of every application process whose background only is false'
     stdout, stderr = exec_command(f'osascript -e \'{apple_script}\'')
     if stderr:
-        raise Exception(f"Не удалось получить список приложений: {stderr}")
+        raise Exception(f"Failed to get list of applications: {stderr}")
 
     apps = [app.strip() for app in stdout.strip().split(", ") if app.strip()]
-    return "Запущенные приложения:\n" + "\n".join(apps)
+    return "Running applications:\n" + "\n".join(apps)
 
 
 def run_applescript(app_name: str, script: str) -> str:
-    """Выполняет AppleScript команду"""
+    """Executes AppleScript command"""
     apple_script = f'tell application "{app_name}"\n{script}\nend tell'
-    # Экранируем одинарные кавычки
+    # Escape single quotes
     apple_script_escaped = apple_script.replace("'", "'\\''")
     stdout, stderr = exec_command(f"osascript -e '{apple_script_escaped}'")
-    return stdout or stderr or "Команда выполнена успешно"
+    return stdout or stderr or "Command executed successfully"
 
 
 def quit_application(app_name: str) -> str:
-    """Закрывает приложение"""
+    """Closes application"""
     apple_script = f'tell application "{app_name}"\nquit\nend tell'
     apple_script_escaped = apple_script.replace("'", "'\\''")
     stdout, stderr = exec_command(f"osascript -e '{apple_script_escaped}'")
     if stderr:
-        raise Exception(f'Не удалось закрыть приложение "{app_name}": {stderr}')
-    return f'Приложение "{app_name}" закрыто'
+        raise Exception(f'Failed to close application "{app_name}": {stderr}')
+    return f'Application "{app_name}" closed'
 
 
 def open_file_with_app(path: str, app_name: str) -> str:
-    """Открывает файл в указанном приложении"""
+    """Opens file in specified application"""
     stdout, stderr = exec_command(f'open -a "{app_name}" "{path}"')
     if stderr:
-        raise Exception(f"Не удалось открыть файл: {stderr}")
-    return f'Файл "{path}" открыт в приложении "{app_name}"'
+        raise Exception(f"Failed to open file: {stderr}")
+    return f'File "{path}" opened in application "{app_name}"'
 
 
-# Реализация инструментов для работы с Ollama
+# Implementation of tools for working with Ollama
 def ollama_generate(prompt: str, model: str = "llama3.2") -> str:
-    """Генерирует ответ через Ollama API"""
+    """Generates response via Ollama API"""
     try:
         response = requests.post(
             f"{OLLAMA_API_URL}/api/generate",
@@ -343,18 +374,18 @@ def ollama_generate(prompt: str, model: str = "llama3.2") -> str:
         )
         response.raise_for_status()
         data = response.json()
-        return data.get("response", "Нет ответа от модели")
+        return data.get("response", "No response from model")
     except requests.exceptions.ConnectionError:
         raise Exception(
-            f"Не удалось подключиться к Ollama серверу ({OLLAMA_API_URL}). "
-            "Убедитесь, что Ollama запущен: ollama serve"
+            f"Failed to connect to Ollama server ({OLLAMA_API_URL}). "
+            "Make sure Ollama is running: ollama serve"
         )
     except Exception as e:
-        raise Exception(f"Ошибка Ollama: {str(e)}")
+        raise Exception(f"Ollama error: {str(e)}")
 
 
 def ollama_list_models() -> str:
-    """Получает список моделей Ollama"""
+    """Gets list of Ollama models"""
     try:
         response = requests.get(f"{OLLAMA_API_URL}/api/tags", timeout=10)
         response.raise_for_status()
@@ -362,7 +393,7 @@ def ollama_list_models() -> str:
         models = data.get("models", [])
 
         if not models:
-            return "Нет доступных моделей. Загрузите модель: ollama pull llama3.2"
+            return "No available models. Load a model: ollama pull llama3.2"
 
         model_list = "\n".join(
             [
@@ -370,34 +401,34 @@ def ollama_list_models() -> str:
                 for model in models
             ]
         )
-        return f"Доступные модели Ollama:\n{model_list}"
+        return f"Available Ollama models:\n{model_list}"
     except requests.exceptions.ConnectionError:
         raise Exception(
-            f"Не удалось подключиться к Ollama серверу ({OLLAMA_API_URL}). "
-            "Убедитесь, что Ollama запущен: ollama serve"
+            f"Failed to connect to Ollama server ({OLLAMA_API_URL}). "
+            "Make sure Ollama is running: ollama serve"
         )
     except Exception as e:
-        raise Exception(f"Ошибка получения списка моделей: {str(e)}")
+        raise Exception(f"Error getting list of models: {str(e)}")
 
 
-# Реализация инструментов для работы с MongoDB
+# Implementation of tools for working with MongoDB
 def mongodb_create_database(database_name: str) -> str:
-    """Создает базу данных в MongoDB"""
+    """Creates database in MongoDB"""
     client = MongoClient(MONGODB_URI)
     try:
         db = client[database_name]
-        # Создаем временную коллекцию, чтобы база данных реально создалась
+        # Create temporary collection so database is actually created
         db.create_collection("_temp")
         db["_temp"].drop()
-        return f'База данных "{database_name}" успешно создана'
+        return f'Database "{database_name}" successfully created'
     except Exception as e:
-        raise Exception(f"Ошибка создания базы данных: {str(e)}")
+        raise Exception(f"Error creating database: {str(e)}")
     finally:
         client.close()
 
 
 def mongodb_list_databases() -> str:
-    """Получает список баз данных"""
+    """Gets list of databases"""
     client = MongoClient(MONGODB_URI)
     try:
         admin_db = client.admin
@@ -407,60 +438,60 @@ def mongodb_list_databases() -> str:
             for db in databases["databases"]
             if db["name"] not in ["admin", "config", "local"]
         ]
-        result = "Базы данных:\n" + (
-            "\n".join(db_names) if db_names else "Базы данных не найдены"
+        result = "Databases:\n" + (
+            "\n".join(db_names) if db_names else "No databases found"
         )
         return result
     except Exception as e:
-        raise Exception(f"Ошибка получения списка баз данных: {str(e)}")
+        raise Exception(f"Error getting list of databases: {str(e)}")
     finally:
         client.close()
 
 
 def mongodb_create_collection(database_name: str, collection_name: str) -> str:
-    """Создает коллекцию в базе данных"""
+    """Creates collection in database"""
     client = MongoClient(MONGODB_URI)
     try:
         db = client[database_name]
         db.create_collection(collection_name)
         return (
-            f'Коллекция "{collection_name}" успешно создана '
-            f'в базе данных "{database_name}"'
+            f'Collection "{collection_name}" successfully created '
+            f'in database "{database_name}"'
         )
     except Exception as e:
-        raise Exception(f"Ошибка создания коллекции: {str(e)}")
+        raise Exception(f"Error creating collection: {str(e)}")
     finally:
         client.close()
 
 
 def mongodb_list_collections(database_name: str) -> str:
-    """Получает список коллекций"""
+    """Gets list of collections"""
     client = MongoClient(MONGODB_URI)
     try:
         db = client[database_name]
         collections = list(db.list_collection_names())
-        result = f'Коллекции в базе данных "{database_name}":\n' + (
-            "\n".join(collections) if collections else "Коллекции не найдены"
+        result = f'Collections in database "{database_name}":\n' + (
+            "\n".join(collections) if collections else "No collections found"
         )
         return result
     except Exception as e:
-        raise Exception(f"Ошибка получения списка коллекций: {str(e)}")
+        raise Exception(f"Error getting list of collections: {str(e)}")
     finally:
         client.close()
 
 
 def mongodb_delete_collection(database_name: str, collection_name: str) -> str:
-    """Удаляет коллекцию"""
+    """Deletes collection"""
     client = MongoClient(MONGODB_URI)
     try:
         db = client[database_name]
         db[collection_name].drop()
         return (
-            f'Коллекция "{collection_name}" успешно удалена '
-            f'из базы данных "{database_name}"'
+            f'Collection "{collection_name}" successfully deleted '
+            f'from database "{database_name}"'
         )
     except Exception as e:
-        raise Exception(f"Ошибка удаления коллекции: {str(e)}")
+        raise Exception(f"Error deleting collection: {str(e)}")
     finally:
         client.close()
 
@@ -468,16 +499,16 @@ def mongodb_delete_collection(database_name: str, collection_name: str) -> str:
 def mongodb_insert_document(
     database_name: str, collection_name: str, document_json: str
 ) -> str:
-    """Вставляет документ в коллекцию"""
+    """Inserts document into collection"""
     client = MongoClient(MONGODB_URI)
     try:
         db = client[database_name]
         collection = db[collection_name]
         document = json.loads(document_json)
         result = collection.insert_one(document)
-        return f'Документ успешно вставлен в коллекцию "{collection_name}". ID: {result.inserted_id}'
+        return f'Document successfully inserted into collection "{collection_name}". ID: {result.inserted_id}'
     except Exception as e:
-        raise Exception(f"Ошибка вставки документа: {str(e)}")
+        raise Exception(f"Error inserting document: {str(e)}")
     finally:
         client.close()
 
@@ -488,21 +519,21 @@ def mongodb_find_documents(
     filter_json: Optional[str] = None,
     limit: int = 100,
 ) -> str:
-    """Находит документы в коллекции"""
+    """Finds documents in collection"""
     client = MongoClient(MONGODB_URI)
     try:
         db = client[database_name]
         collection = db[collection_name]
         filter_dict = json.loads(filter_json) if filter_json else {}
         documents = list(collection.find(filter_dict).limit(limit))
-        # Преобразуем ObjectId в строки
+        # Convert ObjectId to strings
         for doc in documents:
             if "_id" in doc:
                 doc["_id"] = str(doc["_id"])
         documents_str = json.dumps(documents, ensure_ascii=False, indent=2)
-        return f"Найдено документов: {len(documents)}\n\n{documents_str}"
+        return f"Found documents: {len(documents)}\n\n{documents_str}"
     except Exception as e:
-        raise Exception(f"Ошибка поиска документов: {str(e)}")
+        raise Exception(f"Error finding documents: {str(e)}")
     finally:
         client.close()
 
@@ -510,22 +541,22 @@ def mongodb_find_documents(
 def mongodb_delete_document(
     database_name: str, collection_name: str, filter_json: str
 ) -> str:
-    """Удаляет документ(ы) по фильтру"""
+    """Deletes document(s) by filter"""
     client = MongoClient(MONGODB_URI)
     try:
         db = client[database_name]
         collection = db[collection_name]
         filter_dict = json.loads(filter_json)
         result = collection.delete_many(filter_dict)
-        return f"Удалено документов: {result.deleted_count}"
+        return f"Deleted documents: {result.deleted_count}"
     except Exception as e:
-        raise Exception(f"Ошибка удаления документа: {str(e)}")
+        raise Exception(f"Error deleting document: {str(e)}")
     finally:
         client.close()
 
 
 def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
-    """Обрабатывает MCP JSON-RPC запрос"""
+    """Handles MCP JSON-RPC request"""
     method = request.get("method")
     params = request.get("params", {})
     request_id = request.get("id")
@@ -560,7 +591,7 @@ def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
             tool_name = params.get("name")
             arguments = params.get("arguments", {})
 
-            # Вызываем соответствующий инструмент
+            # Call corresponding tool
             if tool_name == "open_application":
                 result_text = open_application(arguments.get("appName"))
             elif tool_name == "get_running_applications":
@@ -575,47 +606,49 @@ def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
                 result_text = open_file_with_app(
                     arguments.get("path"), arguments.get("appName")
                 )
+            elif tool_name == "search_google_in_safari":
+                result_text = search_google_in_safari(arguments.get("query"))
             elif tool_name == "ollama_generate":
                 result_text = ollama_generate(
                     arguments.get("prompt"), arguments.get("model", "llama3.2")
                 )
             elif tool_name == "ollama_list_models":
                 result_text = ollama_list_models()
-            elif tool_name == "mongodb_create_database":
-                result_text = mongodb_create_database(arguments.get("databaseName"))
-            elif tool_name == "mongodb_list_databases":
-                result_text = mongodb_list_databases()
-            elif tool_name == "mongodb_create_collection":
-                result_text = mongodb_create_collection(
-                    arguments.get("databaseName"), arguments.get("collectionName")
-                )
-            elif tool_name == "mongodb_list_collections":
-                result_text = mongodb_list_collections(arguments.get("databaseName"))
-            elif tool_name == "mongodb_delete_collection":
-                result_text = mongodb_delete_collection(
-                    arguments.get("databaseName"), arguments.get("collectionName")
-                )
-            elif tool_name == "mongodb_insert_document":
-                result_text = mongodb_insert_document(
-                    arguments.get("databaseName"),
-                    arguments.get("collectionName"),
-                    arguments.get("document"),
-                )
-            elif tool_name == "mongodb_find_documents":
-                result_text = mongodb_find_documents(
-                    arguments.get("databaseName"),
-                    arguments.get("collectionName"),
-                    arguments.get("filter"),
-                    arguments.get("limit", 100),
-                )
-            elif tool_name == "mongodb_delete_document":
-                result_text = mongodb_delete_document(
-                    arguments.get("databaseName"),
-                    arguments.get("collectionName"),
-                    arguments.get("filter"),
-                )
+            # elif tool_name == "mongodb_create_database":
+            #     result_text = mongodb_create_database(arguments.get("databaseName"))
+            # elif tool_name == "mongodb_list_databases":
+            #     result_text = mongodb_list_databases()
+            # elif tool_name == "mongodb_create_collection":
+            #     result_text = mongodb_create_collection(
+            #         arguments.get("databaseName"), arguments.get("collectionName")
+            #     )
+            # elif tool_name == "mongodb_list_collections":
+            #     result_text = mongodb_list_collections(arguments.get("databaseName"))
+            # elif tool_name == "mongodb_delete_collection":
+            #     result_text = mongodb_delete_collection(
+            #         arguments.get("databaseName"), arguments.get("collectionName")
+            #     )
+            # elif tool_name == "mongodb_insert_document":
+            #     result_text = mongodb_insert_document(
+            #         arguments.get("databaseName"),
+            #         arguments.get("collectionName"),
+            #         arguments.get("document"),
+            #     )
+            # elif tool_name == "mongodb_find_documents":
+            #     result_text = mongodb_find_documents(
+            #         arguments.get("databaseName"),
+            #         arguments.get("collectionName"),
+            #         arguments.get("filter"),
+            #         arguments.get("limit", 100),
+            #     )
+            # elif tool_name == "mongodb_delete_document":
+            #     result_text = mongodb_delete_document(
+            #         arguments.get("databaseName"),
+            #         arguments.get("collectionName"),
+            #         arguments.get("filter"),
+            #     )
             else:
-                raise ValueError(f"Неизвестный инструмент: {tool_name}")
+                raise ValueError(f"Unknown tool: {tool_name}")
 
             return {
                 "jsonrpc": "2.0",
@@ -644,15 +677,15 @@ def handle_request(request: Dict[str, Any]) -> Dict[str, Any]:
             "id": request_id,
             "result": {
                 "content": [
-                    {"type": "text", "text": f"Ошибка: {error_msg}", "isError": True}
+                    {"type": "text", "text": f"Error: {error_msg}", "isError": True}
                 ],
             },
         }
 
 
 def main():
-    """Главная функция - обрабатывает JSON-RPC запросы через stdio"""
-    print("MCP Mac Apps Server (Python) запущен", file=sys.stderr)
+    """Main function - processes JSON-RPC requests via stdio"""
+    print("MCP Mac Apps Server (Python) started", file=sys.stderr)
 
     # Читаем запросы из stdin и отправляем ответы в stdout
     for line in sys.stdin:

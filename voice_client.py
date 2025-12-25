@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Голосовой клиент для управления приложениями Mac через MCP
-Использует Ollama для понимания команд и MCP инструменты для управления
+Voice client for managing Mac applications through MCP
+Uses Ollama for understanding commands and MCP tools for management
 """
 
 import requests
@@ -10,6 +10,7 @@ import subprocess
 import sys
 import os
 import time
+import select
 
 MCP_SERVER_PATH = os.path.join(os.path.dirname(__file__), "src", "server.py")
 OLLAMA_API_URL = "http://localhost:11434"
@@ -20,22 +21,22 @@ try:
     SPEECH_RECOGNITION_AVAILABLE = True
 except ImportError:
     SPEECH_RECOGNITION_AVAILABLE = False
-    print("⚠️  speech_recognition не установлен. Установите: pip install SpeechRecognition")
-    print("   Для голосового ввода также нужен pyaudio: pip install pyaudio")
+    print("⚠️  speech_recognition is not installed. Install: pip install SpeechRecognition")
+    print("   For voice input, pyaudio is also needed: pip install pyaudio")
 
 try:
     import pyttsx3
     TTS_AVAILABLE = True
 except ImportError:
     TTS_AVAILABLE = False
-    print("⚠️  pyttsx3 не установлен. Установите: pip install pyttsx3")
-    print("   Или используйте macOS встроенный say (уже доступен)")
+    print("⚠️  pyttsx3 is not installed. Install: pip install pyttsx3")
+    print("   Or use macOS built-in say (already available)")
 
 
 def speak(text, use_system=True):
-    """Преобразует текст в речь"""
+    """Converts text to speech"""
     if use_system:
-        # Используем встроенную macOS команду say
+        # Use built-in macOS say command
         subprocess.run(["say", text], check=False)
     elif TTS_AVAILABLE:
         try:
@@ -43,53 +44,99 @@ def speak(text, use_system=True):
             engine.say(text)
             engine.runAndWait()
         except Exception as e:
-            print(f"Ошибка TTS: {e}")
+            print(f"TTS error: {e}")
             subprocess.run(["say", text], check=False)
     else:
         subprocess.run(["say", text], check=False)
 
 
-def listen(use_microphone=True):
-    """Слушает голосовой ввод и преобразует в текст"""
+def listen(use_microphone=True, activation_key='space'):
+    """
+    Listens to voice input and converts it to text
+    Activated by pressing a key (default is space)
+    """
     if not use_microphone or not SPEECH_RECOGNITION_AVAILABLE:
-        # Альтернатива: используем системную команду macOS (требует разрешения)
-        print("🎤 Говорите... (нажмите Enter когда закончите)")
-        # Для macOS можно использовать встроенное распознавание речи
-        # Но проще использовать библиотеку speech_recognition
-        return input("Вы: ")
+        # Alternative: use text input
+        return input("You: ")
     
+    # Wait for activation key press
+    if activation_key == 'space':
+        print("⌨️  Press SPACE to start voice recording (or Enter for text input)")
+    elif activation_key == 'enter':
+        print("⌨️  Press ENTER to start voice recording")
+    else:
+        print(f"⌨️  Press {activation_key.upper()} to start voice recording")
+    
+    # Use threading for non-blocking key reading
+    import select
+    import termios
+    import tty
+    
+    # Configure terminal for single character reading
+    old_settings = termios.tcgetattr(sys.stdin)
+    try:
+        tty.setcbreak(sys.stdin.fileno())
+        
+        while True:
+            # Check if there's input
+            if select.select([sys.stdin], [], [], 0)[0]:
+                key = sys.stdin.read(1)
+                
+                # Space or Enter activates recording
+                if key in [' ', '\n', '\r']:
+                    print("\n🎤 Recording... (speak, press Enter when finished)")
+                    break
+                # 'q' to exit
+                elif key == 'q':
+                    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+                    return None
+                # Any other key - text mode
+                elif key == '\x1b':  # ESC
+                    termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+                    return input("\nYou: ")
+    except (ImportError, AttributeError):
+        # Fallback for systems without termios (e.g., Windows)
+        key = input("Press Enter to record voice: ")
+        if key.lower() == 'q':
+            return None
+    
+    finally:
+        try:
+            termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+        except:
+            pass
+    
+    # Start recording
     r = sr.Recognizer()
     
     with sr.Microphone() as source:
-        print("🎤 Слушаю... (говорите после сигнала)")
-        # Адаптация к окружающему шуму
-        r.adjust_for_ambient_noise(source, duration=0.5)
-        print("✓ Готово, говорите!")
+        # Adapt to ambient noise (faster for button activation)
+        r.adjust_for_ambient_noise(source, duration=0.3)
         
         try:
-            audio = r.listen(source, timeout=5, phrase_time_limit=10)
-            print("🔄 Распознаю речь...")
+            # Listen with increased time limit since user already pressed button
+            audio = r.listen(source, timeout=30, phrase_time_limit=30)
+            print("🔄 Recognizing speech...")
             
-            # Используем Google Speech Recognition (требует интернет)
-            # Для офлайн можно использовать Whisper или другие
-            text = r.recognize_google(audio, language="ru-RU")
-            print(f"📝 Распознано: {text}")
+            # Use Google Speech Recognition (requires internet)
+            text = r.recognize_google(audio, language="en-US")
+            print(f"📝 Recognized: {text}")
             return text
             
         except sr.WaitTimeoutError:
-            print("⏱️  Тайм-аут. Не услышал команду.")
+            print("⏱️  Timeout. Didn't hear command.")
             return None
         except sr.UnknownValueError:
-            print("❌ Не удалось распознать речь")
+            print("❌ Could not recognize speech")
             return None
         except sr.RequestError as e:
-            print(f"❌ Ошибка сервиса распознавания речи: {e}")
-            print("💡 Используйте текстовый ввод или установите офлайн распознавание")
+            print(f"❌ Speech recognition service error: {e}")
+            print("💡 Use text input or install offline recognition")
             return None
 
 
 def call_mcp_tool(tool_name, arguments):
-    """Вызывает MCP инструмент через JSON-RPC"""
+    """Calls MCP tool via JSON-RPC"""
     request = {
         "jsonrpc": "2.0",
         "id": 1,
@@ -121,21 +168,75 @@ def call_mcp_tool(tool_name, arguments):
                         if content:
                             return content[0].get("text", "")
                     if "error" in response:
-                        return f"Ошибка: {response['error'].get('message', 'Неизвестная ошибка')}"
+                        return f"Error: {response['error'].get('message', 'Unknown error')}"
                 except json.JSONDecodeError:
                     continue
         
-        return "Нет ответа от MCP сервера"
+        return "No response from MCP server"
         
     except subprocess.TimeoutExpired:
         process.kill()
-        return "Тайм-аут при вызове MCP инструмента"
+        return "Timeout when calling MCP tool"
     except Exception as e:
-        return f"Ошибка вызова MCP инструмента: {str(e)}"
+        return f"Error calling MCP tool: {str(e)}"
+
+
+def extract_search_query(user_query):
+    print(f"🔍 Extracting query from: '{user_query}'")
+    """Extracts search query from user text"""
+    import re
+    if not user_query:
+        return None
+    
+    # Patterns for finding query (more precise, using greedy quantifier)
+    patterns = [
+        r'find\s+(.+?)\s+in\s+google',
+        r'search\s+(.+?)\s+in\s+google',
+        r'search\s+for\s+(.+?)\s+in\s+google',
+        r'look\s+up\s+(.+?)\s+in\s+google',
+        r'google\s+(.+?)$',
+    ]
+    
+    query_lower = user_query.lower()
+    for pattern in patterns:
+        match = re.search(pattern, query_lower, re.IGNORECASE)
+        if match:
+            query = match.group(1).strip()
+            # Remove extra words at the end (in case pattern captured extra)
+            query = re.sub(r'\s+in\s+google.*$', '', query, flags=re.IGNORECASE)
+            if query:
+                return query.strip()
+    
+    # If pattern with "in google" not found, try just "find X" or "search X"
+    simple_patterns = [
+        r'^find\s+(.+)$',
+        r'^search\s+(.+)$',
+        r'^search\s+for\s+(.+)$',
+        r'^look\s+up\s+(.+)$',
+    ]
+    
+    for pattern in simple_patterns:
+        match = re.search(pattern, query_lower, re.IGNORECASE)
+        if match:
+            query = match.group(1).strip()
+            # Remove "in google" if present
+            query = re.sub(r'\s+in\s+google.*$', '', query, flags=re.IGNORECASE)
+            if query:
+                return query.strip()
+    
+    # If no pattern found, return entire query, removing words "find", "search", "in google"
+    query = user_query
+    query = re.sub(r'^find\s+', '', query, flags=re.IGNORECASE)
+    query = re.sub(r'^search\s+', '', query, flags=re.IGNORECASE)
+    query = re.sub(r'^search\s+for\s+', '', query, flags=re.IGNORECASE)
+    query = re.sub(r'^look\s+up\s+', '', query, flags=re.IGNORECASE)
+    query = re.sub(r'\s+in\s+google.*$', '', query, flags=re.IGNORECASE)
+    result = query.strip() if query.strip() else None
+    return result
 
 
 def list_mcp_tools():
-    """Получает список доступных MCP инструментов"""
+    """Gets list of available MCP tools"""
     request = {
         "jsonrpc": "2.0",
         "id": 1,
@@ -167,12 +268,12 @@ def list_mcp_tools():
         return []
         
     except Exception as e:
-        print(f"Ошибка получения списка инструментов: {e}", file=sys.stderr)
+        print(f"Error getting list of tools: {e}", file=sys.stderr)
         return []
 
 
 def ask_ollama_with_tools(user_query, verbose=False):
-    """Использует Ollama для понимания запроса и вызова соответствующих MCP инструментов"""
+    """Uses Ollama to understand the request and call appropriate MCP tools"""
     
     tools = list_mcp_tools()
     tools_description = "\n".join([
@@ -180,36 +281,43 @@ def ask_ollama_with_tools(user_query, verbose=False):
         for tool in tools
     ])
     
-    system_prompt = f"""Ты помощник, который может управлять приложениями на Mac через MCP инструменты.
+    system_prompt = f"""You are an assistant that can manage Mac applications through MCP tools.
 
-Доступные инструменты:
+Available tools:
 {tools_description}
 
-Когда пользователь просит открыть приложение, выполнить действие или получить информацию, определи какой инструмент нужно использовать и верни JSON в формате:
+When the user asks to open an application, perform an action, or get information, determine which tool to use and return JSON in the format:
 {{
-    "tool": "имя_инструмента",
-    "arguments": {{"параметр": "значение"}}
+    "tool": "tool_name",
+    "arguments": {{"parameter": "value"}}
 }}
 
-Если запрос не требует использования инструментов, просто ответь обычным текстом.
+If the request doesn't require using tools, just respond with regular text.
 
-Примеры:
-- "Открой Calculator" -> {{"tool": "open_application", "arguments": {{"appName": "Calculator"}}}}
-- "Закрой Safari" -> {{"tool": "quit_application", "arguments": {{"appName": "Safari"}}}}
-- "Какие приложения запущены?" -> {{"tool": "get_running_applications", "arguments": {{}}}}
-- "Открой MongoDB Compass" -> {{"tool": "open_application", "arguments": {{"appName": "MongoDB Compass"}}}}
-- "Создай базу данных test" -> {{"tool": "mongodb_create_database", "arguments": {{"databaseName": "test"}}}}
-- "Создай коллекцию users в базе test" -> {{"tool": "mongodb_create_collection", "arguments": {{"databaseName": "test", "collectionName": "users"}}}}
-- "Добавь документ {{\"name\": \"John\"}} в коллекцию users базы test" -> {{"tool": "mongodb_insert_document", "arguments": {{"databaseName": "test", "collectionName": "users", "document": "{{\\\"name\\\": \\\"John\\\"}}"}}}}
+Examples:
+- "Open Calculator" -> {{"tool": "open_application", "arguments": {{"appName": "Calculator"}}}}
+- "Close Safari" -> {{"tool": "quit_application", "arguments": {{"appName": "Safari"}}}}
+- "What applications are running?" -> {{"tool": "get_running_applications", "arguments": {{}}}}
+- "Open MongoDB Compass" -> {{"tool": "open_application", "arguments": {{"appName": "MongoDB Compass"}}}}
+- "Create database test" -> {{"tool": "mongodb_create_database", "arguments": {{"databaseName": "test"}}}}
+- "Create collection users in database test" -> {{"tool": "mongodb_create_collection", "arguments": {{"databaseName": "test", "collectionName": "users"}}}}
+- "Add document {{\"name\": \"John\"}} to collection users in database test" -> {{"tool": "mongodb_insert_document", "arguments": {{"databaseName": "test", "collectionName": "users", "document": "{{\\\"name\\\": \\\"John\\\"}}"}}}}
+- "Find apple image in Google" -> {{"tool": "search_google_in_safari", "arguments": {{"query": "apple image"}}}}
+- "Search Google for Python" -> {{"tool": "search_google_in_safari", "arguments": {{"query": "Python"}}}}
+- "Find information about MCP in Google" -> {{"tool": "search_google_in_safari", "arguments": {{"query": "MCP"}}}}
 
-Отвечай только JSON или обычным текстом, без дополнительных объяснений."""
+IMPORTANT: 
+- For search_google_in_safari always extract the search query from the user's text and pass it in the "query" parameter. If the user says "find X in Google" or "search Y", then query should be "X" or "Y".
+- ALWAYS return ONLY a valid JSON object in the format {{"tool": "...", "arguments": {{...}}}}. DO NOT return just text or tool name without JSON. DO NOT return empty arguments.
+
+Respond ONLY with JSON, without additional explanations or text."""
 
     try:
         response = requests.post(
             f"{OLLAMA_API_URL}/api/generate",
             json={
                 "model": OLLAMA_MODEL,
-                "prompt": f"{system_prompt}\n\nПользователь: {user_query}\nПомощник:",
+                "prompt": f"{system_prompt}\n\nUser: {user_query}\nAssistant:",
                 "stream": False,
                 "options": {
                     "temperature": 0.3,
@@ -220,130 +328,190 @@ def ask_ollama_with_tools(user_query, verbose=False):
         )
         
         if response.status_code != 200:
-            return f"Ошибка Ollama: {response.status_code}", False
+            return f"Ollama error: {response.status_code}", False
         
         result = response.json()
         answer = result.get("response", "").strip()
         
         if verbose:
-            print(f"🤖 Ответ Ollama: {answer}")
+            print(f"🤖 Ollama response: {answer}")
         
-        # Пытаемся распарсить JSON
+        # Try to parse JSON
         try:
             import re
             json_pattern = r'\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}'
             json_matches = re.findall(json_pattern, answer, re.DOTALL)
+            print(f"🔍 JSON matches: {json_matches}")
             
             for json_str in json_matches:
                 try:
                     tool_call = json.loads(json_str)
-                    
                     if "tool" in tool_call:
                         tool_name = tool_call["tool"]
                         tool_args = tool_call.get("arguments", {})
                         
+                        print(f"🔧 tool_call: {tool_call}")
+                        print(f"🔧 tool_name: {tool_name}")
+                        
+                        # Fallback: if arguments are empty for search_google_in_safari, extract query from user_query
+                        if tool_name == "search_google_in_safari":
+                            print(f"🔍 ==========tool_name: {tool_name}")
+                            # Check if query is in arguments
+                            current_query = None
+                            if tool_args and isinstance(tool_args, dict):
+                                current_query = tool_args.get("query")
+                            
+                            print(f"🔍 Check: tool_args={tool_args}, current_query={current_query}")
+                            
+                            if not current_query:
+                                # Try to extract search query from original request
+                                print(f"🔍 Extracting query from: '{user_query}'")
+                                query = extract_search_query(user_query)
+                                print(f"🔍 Extraction result: '{query}'")
+                                
+                                if query:
+                                    # Make sure tool_args is a dictionary
+                                    if not tool_args or not isinstance(tool_args, dict):
+                                        tool_args = {}
+                                    tool_args["query"] = query
+                                    print(f"✅ Set query: '{query}'")
+                                else:
+                                    print(f"⚠️ Failed to extract query from: '{user_query}'")
+                                    # As last resort, use entire query, removing service words
+                                    fallback_query = user_query.replace("find", "").replace("search", "").replace("in google", "").replace("for", "").strip()
+                                    if fallback_query:
+                                        if not tool_args or not isinstance(tool_args, dict):
+                                            tool_args = {}
+                                        tool_args["query"] = fallback_query
+                                        print(f"✅ Used fallback query: '{fallback_query}'")
+                        
                         if verbose:
-                            print(f"🔧 Вызываю инструмент: {tool_name}")
-                            print(f"📝 Аргументы: {tool_args}")
+                            print(f"🔧 Calling tool: {tool_name}")
+                            print(f"📝 Arguments: {tool_args}")
                         
                         result = call_mcp_tool(tool_name, tool_args)
                         return result, True
                 except json.JSONDecodeError:
                     continue
             
-            # Пытаемся распарсить весь ответ как JSON
+            # Try to parse entire response as JSON
             tool_call = json.loads(answer)
+            print(f"🔧 tool_call: {tool_call}")
             if "tool" in tool_call:
                 tool_name = tool_call["tool"]
                 tool_args = tool_call.get("arguments", {})
                 
+                # Fallback: if arguments are empty for search_google_in_safari, extract query from user_query
+                if tool_name == "search_google_in_safari" and (not tool_args or not tool_args.get("query")):
+                    query = extract_search_query(user_query)
+                    if query:
+                        if not tool_args:
+                            tool_args = {}
+                        tool_args["query"] = query
+                        print(f"🔍 Extracted search query from text: '{query}'")
+                    else:
+                        print(f"⚠️ Failed to extract search query from: '{user_query}'")
+                
                 if verbose:
-                    print(f"🔧 Вызываю инструмент: {tool_name}")
+                    print(f"🔧 Calling tool: {tool_name}")
+                    print(f"📝 Arguments: {tool_args}")
                 
                 result = call_mcp_tool(tool_name, tool_args)
                 return result, True
                     
         except (json.JSONDecodeError, KeyError):
+            print(f"🔧 Failed to parse JSON: {answer}")
+            # If not JSON, check if it's just a tool name
+            answer_lower = answer.lower().strip()
+            if "search_google" in answer_lower or answer_lower == "search_google_in_safari":
+                # Try to extract search query from original request
+                query = extract_search_query(user_query)
+                if query:
+                    if verbose:
+                        print(f"🔧 Calling tool: search_google_in_safari")
+                        print(f"📝 Arguments: {{'query': '{query}'}}")
+                    result = call_mcp_tool("search_google_in_safari", {"query": query})
+                    return result, True
             pass
         
         return answer, False
         
     except requests.exceptions.ConnectionError:
-        return "❌ Не удалось подключиться к Ollama. Запустите: ollama serve", False
+        return "❌ Failed to connect to Ollama. Start: ollama serve", False
     except Exception as e:
-        return f"Ошибка: {str(e)}", False
+        return f"Error: {str(e)}", False
 
 
 def main():
-    print("🎤 Голосовой помощник для управления приложениями Mac")
+    print("🎤 Voice assistant for managing Mac applications")
     print("=" * 60)
-    print(f"📦 Модель: {OLLAMA_MODEL}")
+    print(f"📦 Model: {OLLAMA_MODEL}")
     print(f"🌐 Ollama: {OLLAMA_API_URL}")
     print("=" * 60)
     print()
     
-    # Проверка доступности
+    # Check availability
     if not SPEECH_RECOGNITION_AVAILABLE:
-        print("💡 Для голосового ввода установите:")
+        print("💡 For voice input, install:")
         print("   pip install SpeechRecognition pyaudio")
         print()
-        print("📝 Сейчас будет использован текстовый ввод")
+        print("📝 Text input will be used now")
         print()
         use_voice_input = False
     else:
         use_voice_input = True
-        print("✅ Голосовой ввод доступен")
-        print("✅ Голосовой вывод доступен (через macOS say)")
+        print("✅ Voice input available")
+        print("✅ Voice output available (via macOS say)")
         print()
     
     while True:
         try:
-            # Голосовой или текстовый ввод
+            # Voice or text input
             if use_voice_input:
                 query = listen()
                 if query is None:
                     continue
             else:
-                query = input("Вы (или 'выход' для завершения): ").strip()
+                query = input("You (or 'exit' to quit): ").strip()
             
             if not query:
                 continue
             
-            if query.lower() in ['выход', 'exit', 'quit', 'стоп']:
-                speak("До свидания!")
-                print("👋 До свидания!")
+            if query.lower() in ['exit', 'quit', 'stop']:
+                speak("Goodbye!")
+                print("👋 Goodbye!")
                 break
             
-            print(f"\n💬 Запрос: {query}")
+            print(f"\n💬 Request: {query}")
             print("-" * 60)
             
-            # Обработка запроса
+            # Process request
             result, is_action = ask_ollama_with_tools(query, verbose=True)
             
-            print(f"\n📋 Результат: {result}")
+            print(f"\n📋 Result: {result}")
             
-            # Голосовой вывод результата
+            # Voice output of result
             if is_action:
-                # Для действий говорим краткий ответ
+                # For actions, speak brief answer
                 speak(result.split('\n')[0] if '\n' in result else result)
             else:
-                # Для обычных ответов говорим весь текст (если короткий)
+                # For regular answers, speak entire text (if short)
                 if len(result) < 200:
                     speak(result)
                 else:
-                    speak("Результат показан на экране")
+                    speak("Result shown on screen")
             
             print()
-            time.sleep(0.5)  # Небольшая пауза между командами
+            time.sleep(0.5)  # Small pause between commands
             
         except KeyboardInterrupt:
-            print("\n\n👋 Прервано пользователем")
-            speak("До свидания!")
+            print("\n\n👋 Interrupted by user")
+            speak("Goodbye!")
             break
         except Exception as e:
-            error_msg = f"Ошибка: {str(e)}"
+            error_msg = f"Error: {str(e)}"
             print(f"\n❌ {error_msg}")
-            speak("Произошла ошибка")
+            speak("An error occurred")
             time.sleep(1)
 
 

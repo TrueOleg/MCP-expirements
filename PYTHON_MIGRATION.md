@@ -1,48 +1,48 @@
-# Миграция MCP сервера на Python
+# MCP Server Migration to Python
 
-## ✅ Завершено
+## ✅ Completed
 
-MCP сервер успешно переписан с TypeScript/JavaScript на Python!
+MCP server successfully rewritten from TypeScript/JavaScript to Python!
 
-## 📁 Новые файлы
+## 📁 New Files
 
-- **`src/server.py`** - Python версия MCP сервера
-- **`requirements.txt`** - Python зависимости
+- **`src/server.py`** - Python version of MCP server
+- **`requirements.txt`** - Python dependencies
 
-## 🚀 Использование
+## 🚀 Usage
 
-### 1. Установите зависимости
+### 1. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Или вручную:
+Or manually:
 ```bash
 pip install pymongo requests
 ```
 
-### 2. Запустите сервер
+### 2. Run Server
 
 ```bash
 python3 src/server.py
 ```
 
-Или сделайте файл исполняемым:
+Or make the file executable:
 ```bash
 chmod +x src/server.py
 ./src/server.py
 ```
 
-### 3. Используйте с клиентами
+### 3. Use with Clients
 
-Все клиенты уже обновлены для использования Python версии:
-- `mcp_client.py` - текстовый клиент
-- `voice_client.py` - голосовой клиент
+All clients are already updated to use the Python version:
+- `mcp_client.py` - text client
+- `voice_client.py` - voice client
 
-## ⚙️ Настройка в Claude Desktop
+## ⚙️ Claude Desktop Configuration
 
-Обновите конфигурацию Claude Desktop (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+Update Claude Desktop configuration (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 
 ```json
 {
@@ -55,76 +55,75 @@ chmod +x src/server.py
 }
 ```
 
-## 🔄 Что изменилось
+## 🔄 What Changed
 
-### Преимущества Python версии:
+### Python Version Advantages:
 
-1. ✅ Проще в использовании - не требует компиляции (npm run build)
-2. ✅ Меньше зависимостей - только pymongo и requests
-3. ✅ Прямая реализация JSON-RPC через stdio
-4. ✅ Все функции сохранены - все инструменты работают идентично
+1. ✅ Easier to use - no compilation required (npm run build)
+2. ✅ Fewer dependencies - only pymongo and requests
+3. ✅ Direct JSON-RPC implementation via stdio
+4. ✅ All features preserved - all tools work identically
 
-### Функциональность:
+### Functionality:
 
-Все инструменты работают так же, как в TypeScript версии:
-- ✅ Управление приложениями Mac
-- ✅ Работа с Ollama
-- ✅ Работа с MongoDB
-- ✅ AppleScript автоматизация
+All tools work the same as in the TypeScript version:
+- ✅ Mac application management
+- ✅ Ollama integration
+- ✅ MongoDB integration
+- ✅ AppleScript automation
 
-## 📋 Сравнение версий
+## 📋 Version Comparison
 
-| Особенность | TypeScript | Python |
-|------------|-----------|--------|
-| Компиляция | Требуется (npm run build) | Не требуется |
-| Зависимости | @modelcontextprotocol/sdk, mongodb | pymongo, requests |
-| Размер | Больше (node_modules) | Меньше |
-| Скорость | Быстро | Быстро |
-| Совместимость | ✅ | ✅ |
+| Feature | TypeScript | Python |
+|---------|-----------|--------|
+| Compilation | Required (npm run build) | Not required |
+| Dependencies | @modelcontextprotocol/sdk, mongodb | pymongo, requests |
+| Size | Larger (node_modules) | Smaller |
+| Speed | Fast | Fast |
+| Compatibility | ✅ | ✅ |
 
-## 🔧 Переменные окружения
+## 🔧 Environment Variables
 
-Обе версии используют одинаковые переменные окружения:
+Both versions use the same environment variables:
 
 ```bash
 export OLLAMA_API_URL="http://localhost:11434"
 export MONGODB_URI="mongodb://localhost:27017"
 ```
 
-## 📚 Документация
+## 📚 Documentation
 
-- Основная документация: [README.md](./README.md)
-- Голосовое управление: [VOICE_SETUP.md](./VOICE_SETUP.md)
+- Main documentation: [README.md](./README.md)
+- Voice control: [VOICE_SETUP.md](./VOICE_SETUP.md)
 - MongoDB: [MONGODB_USAGE.md](./MONGODB_USAGE.md)
 
-## 🐛 Устранение проблем
+## 🐛 Troubleshooting
 
-### Ошибка: "No module named 'pymongo'"
+### Error: "No module named 'pymongo'"
 
-**Решение:**
+**Solution:**
 ```bash
 pip install -r requirements.txt
 ```
 
-### Ошибка: "No module named 'requests'"
+### Error: "No module named 'requests'"
 
-**Решение:**
+**Solution:**
 ```bash
 pip install requests
 ```
 
-### Сервер не запускается
+### Server Won't Start
 
-Проверьте, что Python 3 установлен:
+Check that Python 3 is installed:
 ```bash
 python3 --version
 ```
 
-Должно быть Python 3.7 или выше.
+Should be Python 3.7 or higher.
 
-## ⚠️ Примечание
+## ⚠️ Note
 
-Старая TypeScript версия (`src/index.ts` и `dist/index.js`) все еще доступна, но клиенты теперь используют Python версию по умолчанию.
+The old TypeScript version (`src/index.ts` and `dist/index.js`) is still available, but clients now use the Python version by default.
 
-Если нужно вернуться к TypeScript версии, обновите пути в клиентах обратно на `dist/index.js` и `node`.
-
+If you need to revert to the TypeScript version, update paths in clients back to `dist/index.js` and `node`.

@@ -1,20 +1,20 @@
-# Совместимые LLM и клиенты для MCP Mac Apps Server
+# Compatible LLMs and Clients for MCP Mac Apps Server
 
-Ваш MCP сервер работает с **любым LLM**, который использует MCP-совместимый клиент. MCP (Model Context Protocol) - это стандартизированный протокол, поэтому главное - использовать клиент, который его поддерживает.
+Your MCP server works with **any LLM** that uses an MCP-compatible client. MCP (Model Context Protocol) is a standardized protocol, so the main thing is to use a client that supports it.
 
-## 🔌 MCP-совместимые клиенты
+## 🔌 MCP-Compatible Clients
 
-### 1. Claude Desktop (Anthropic) ⭐ Рекомендуется
+### 1. Claude Desktop (Anthropic) ⭐ Recommended
 
-**Статус**: Полная поддержка MCP, официальный клиент
+**Status**: Full MCP support, official client
 
-**Установка**:
-- Скачайте с официального сайта Anthropic
-- Установите и создайте аккаунт
+**Installation**:
+- Download from the official Anthropic website
+- Install and create an account
 
-**Настройка**:
-1. Найдите файл: `~/Library/Application Support/Claude/claude_desktop_config.json`
-2. Добавьте конфигурацию:
+**Configuration**:
+1. Find the file: `~/Library/Application Support/Claude/claude_desktop_config.json`
+2. Add configuration:
 
 ```json
 {
@@ -27,128 +27,128 @@
 }
 ```
 
-**Доступные LLM**: Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
+**Available LLMs**: Claude 3.5 Sonnet, Claude 3 Opus, Claude 3 Haiku
 
 ---
 
-### 2. Ollama (локальные модели) 🏠 ✅ УСТАНОВЛЕН
+### 2. Ollama (Local Models) 🏠 ✅ INSTALLED
 
-**Статус**: Локальные модели через MCP клиенты
+**Status**: Local models via MCP clients
 
-**Текущие модели**: 
-- ✅ `llama3.2` (2.0 GB) - установлена
-- ✅ `deepseek-r1:8b` (5.2 GB) - установлена
+**Current models**: 
+- ✅ `llama3.2` (2.0 GB) - installed
+- ✅ `deepseek-r1:8b` (5.2 GB) - installed
 
-📖 **Подробная инструкция**: [OLLAMA_SETUP.md](./OLLAMA_SETUP.md)
+📖 **Detailed instructions**: [OLLAMA_SETUP.md](./OLLAMA_SETUP.md)
 
-**Установка**:
+**Installation**:
 ```bash
-# Установите Ollama
+# Install Ollama
 brew install ollama
-# Или скачайте с https://ollama.ai
+# Or download from https://ollama.ai
 
-# Запустите Ollama
+# Start Ollama
 ollama serve
 ```
 
-**Доступные модели** (загружаются по требованию):
+**Available models** (loaded on demand):
 ```bash
-# Популярные модели:
-ollama pull llama3.2          # 3B параметров, очень быстрая
-ollama pull llama3.1:8b       # 8B параметров
+# Popular models:
+ollama pull llama3.2          # 3B parameters, very fast
+ollama pull llama3.1:8b       # 8B parameters
 ollama pull qwen2.5:7b        # Alibaba Qwen
 ollama pull mistral:7b        # Mistral AI
-ollama pull codellama:7b      # Для программирования
+ollama pull codellama:7b      # For programming
 ollama pull phi3              # Microsoft Phi-3
 ```
 
-**Использование с MCP**:
-- Через Claude Desktop: установите MCP сервер для Ollama
-- Или используйте другие MCP клиенты с поддержкой Ollama
+**Usage with MCP**:
+- Via Claude Desktop: install MCP server for Ollama
+- Or use other MCP clients with Ollama support
 
 ---
 
-### 3. LM Studio (локальные модели) 🎨
+### 3. LM Studio (Local Models) 🎨
 
-**Статус**: Графический интерфейс для локальных LLM
+**Status**: Graphical interface for local LLMs
 
-**Установка**:
-- Скачайте с https://lmstudio.ai
-- Установите и загрузите модели через интерфейс
+**Installation**:
+- Download from https://lmstudio.ai
+- Install and load models through the interface
 
-**Поддержка MCP**:
-- Есть официальный MCP сервер для LM Studio
-- Интегрируется с Claude Desktop
+**MCP Support**:
+- Official MCP server for LM Studio available
+- Integrates with Claude Desktop
 
-**Доступные модели**: Поддерживает GGUF формат (Llama, Mistral, Phi и др.)
+**Available models**: Supports GGUF format (Llama, Mistral, Phi, etc.)
 
 ---
 
 ### 4. DeepSeek
 
-**Статус**: Зависит от поддержки MCP в клиенте DeepSeek
+**Status**: Depends on MCP support in DeepSeek client
 
-**Варианты**:
-- Если DeepSeek Desktop поддерживает MCP (см. DEEPSEEK_SETUP.md)
-- Через API через другие клиенты
+**Options**:
+- If DeepSeek Desktop supports MCP (see DEEPSEEK_SETUP.md)
+- Via API through other clients
 
 ---
 
 ### 5. OpenAI (GPT-4, GPT-3.5)
 
-**Статус**: Через Claude Desktop или другие MCP клиенты
+**Status**: Via Claude Desktop or other MCP clients
 
-**Использование**:
-- Claude Desktop может использовать OpenAI API (если поддерживается)
-- Или через другие MCP-совместимые клиенты
+**Usage**:
+- Claude Desktop can use OpenAI API (if supported)
+- Or through other MCP-compatible clients
 
 ---
 
-### 6. Другие локальные LLM
+### 6. Other Local LLMs
 
-Через Ollama или LM Studio можно использовать:
-- **Llama 3** (Meta) - различные размеры
+Through Ollama or LM Studio you can use:
+- **Llama 3** (Meta) - various sizes
 - **Mistral** (Mistral AI)
 - **Qwen** (Alibaba)
 - **Phi-3** (Microsoft)
-- **Code Llama** (Meta) - для кода
-- **StarCoder** - для программирования
-- И многие другие...
+- **Code Llama** (Meta) - for code
+- **StarCoder** - for programming
+- And many others...
 
 ---
 
-## 🎯 Рекомендации по выбору
+## 🎯 Selection Recommendations
 
-### Для быстрого старта
-**Claude Desktop** - самый простой вариант:
-- ✅ Установка за 2 минуты
-- ✅ Полная поддержка MCP из коробки
-- ✅ Отличное качество ответов
-- ❌ Требует интернет (облачная модель)
+### For Quick Start
+**Claude Desktop** - the simplest option:
+- ✅ Installation in 2 minutes
+- ✅ Full MCP support out of the box
+- ✅ Excellent response quality
+- ❌ Requires internet (cloud model)
 
-### Для приватности и офлайн работы
+### For Privacy and Offline Work
 **Ollama + Claude Desktop**:
-- ✅ Работает полностью локально
-- ✅ Не требует интернета
-- ✅ Бесплатно
-- ❌ Требует достаточно RAM (8GB+ для больших моделей)
-- ❌ Может быть медленнее облачных моделей
+- ✅ Works completely locally
+- ✅ No internet required
+- ✅ Free
+- ❌ Requires sufficient RAM (8GB+ for large models)
+- ❌ May be slower than cloud models
 
-### Для удобного управления моделями
+### For Convenient Model Management
 **LM Studio**:
-- ✅ Красивый графический интерфейс
-- ✅ Легко переключаться между моделями
-- ✅ Подробная информация о моделях
-- ✅ Поддержка MCP через интеграцию
+- ✅ Beautiful graphical interface
+- ✅ Easy to switch between models
+- ✅ Detailed model information
+- ✅ MCP support through integration
 
 ---
 
-## 🔧 Настройка локальных моделей
+## 🔧 Local Model Configuration
 
-### Вариант 1: Ollama через MCP
+### Option 1: Ollama via MCP
 
-1. Установите Ollama и запустите сервер
-2. Установите MCP сервер для Ollama в Claude Desktop:
+1. Install Ollama and start the server
+2. Install MCP server for Ollama in Claude Desktop:
 
 ```json
 {
@@ -165,11 +165,11 @@ ollama pull phi3              # Microsoft Phi-3
 }
 ```
 
-### Вариант 2: LM Studio MCP
+### Option 2: LM Studio MCP
 
-1. Установите LM Studio
-2. Запустите локальный сервер в LM Studio
-3. Добавьте в конфигурацию Claude Desktop:
+1. Install LM Studio
+2. Start local server in LM Studio
+3. Add to Claude Desktop configuration:
 
 ```json
 {
@@ -188,86 +188,85 @@ ollama pull phi3              # Microsoft Phi-3
 
 ---
 
-## 📊 Сравнение вариантов
+## 📊 Option Comparison
 
-| Вариант | Скорость | Приватность | Качество | Стоимость | Интернет |
-|---------|----------|-------------|----------|-----------|----------|
-| Claude Desktop | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | 💰💰💰 | Обязателен |
-| Ollama (llama3.2) | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Бесплатно | Не нужен |
-| Ollama (llama3.1:8b) | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Бесплатно | Не нужен |
-| LM Studio | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Бесплатно | Не нужен |
+| Option | Speed | Privacy | Quality | Cost | Internet |
+|--------|-------|---------|---------|------|----------|
+| Claude Desktop | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐⭐ | 💰💰💰 | Required |
+| Ollama (llama3.2) | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | Free | Not needed |
+| Ollama (llama3.1:8b) | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Free | Not needed |
+| LM Studio | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | Free | Not needed |
 
 ---
 
-## 🚀 Быстрый старт
+## 🚀 Quick Start
 
-### Самый простой путь (рекомендуется для начала):
+### Simplest Path (recommended for beginners):
 
-1. **Установите Claude Desktop**
+1. **Install Claude Desktop**
    ```bash
-   # Скачайте с https://claude.ai/download
+   # Download from https://claude.ai/download
    ```
 
-2. **Настройте MCP сервер** (см. README.md)
+2. **Configure MCP server** (see README.md)
 
-3. **Начните использовать** - просто спросите Claude:
-   - "Открой Safari"
-   - "Какие приложения запущены?"
-   - "Открой файл ~/Documents/test.txt в TextEdit"
+3. **Start using** - just ask Claude:
+   - "Open Safari"
+   - "What applications are running?"
+   - "Open file ~/Documents/test.txt in TextEdit"
 
-### Для локальных моделей:
+### For Local Models:
 
-1. **Установите Ollama**
+1. **Install Ollama**
    ```bash
    brew install ollama
    ollama serve
    ```
 
-2. **Загрузите модель**
+2. **Load a model**
    ```bash
    ollama pull llama3.2
    ```
 
-3. **Настройте MCP в Claude Desktop** (см. выше)
+3. **Configure MCP in Claude Desktop** (see above)
 
-4. **Используйте локальную модель** через Claude Desktop
-
----
-
-## 📝 Примеры использования
-
-После настройки любого из этих вариантов, вы сможете использовать LLM для управления приложениями:
-
-```
-Пользователь: "Открой Safari и перейди на google.com"
-LLM: [использует open_application и run_applescript]
-
-Пользователь: "Покажи мне все запущенные приложения"
-LLM: [использует get_running_applications]
-
-Пользователь: "Создай новый документ в TextEdit и напиши 'Hello World'"
-LLM: [использует open_application и run_applescript]
-```
+4. **Use local model** through Claude Desktop
 
 ---
 
-## 🔍 Поиск других MCP клиентов
+## 📝 Usage Examples
 
-Если хотите найти другие варианты:
+After configuring any of these options, you'll be able to use LLM to manage applications:
+
+```
+User: "Open Safari and go to google.com"
+LLM: [uses open_application and run_applescript]
+
+User: "Show me all running applications"
+LLM: [uses get_running_applications]
+
+User: "Create a new document in TextEdit and write 'Hello World'"
+LLM: [uses open_application and run_applescript]
+```
+
+---
+
+## 🔍 Finding Other MCP Clients
+
+If you want to find other options:
 - [MCP Servers List](https://github.com/modelcontextprotocol/servers)
 - [MCP Market](https://mcplist.ru)
-- Официальная документация MCP
+- Official MCP documentation
 
 ---
 
-## ⚠️ Важные замечания
+## ⚠️ Important Notes
 
-1. **Совместимость**: Ваш MCP сервер работает с любым MCP-совместимым клиентом
-2. **Множественные серверы**: Можете использовать несколько MCP серверов одновременно
-3. **Приватность**: Локальные модели (Ollama, LM Studio) обеспечивают полную приватность
-4. **Производительность**: Для локальных моделей требуется достаточно RAM (рекомендуется 16GB+)
+1. **Compatibility**: Your MCP server works with any MCP-compatible client
+2. **Multiple Servers**: You can use multiple MCP servers simultaneously
+3. **Privacy**: Local models (Ollama, LM Studio) provide complete privacy
+4. **Performance**: Local models require sufficient RAM (16GB+ recommended)
 
 ---
 
-**Главное**: Выберите клиент, который вам удобен. MCP сервер будет работать одинаково со всеми! 🎉
-
+**Main point**: Choose the client that suits you. The MCP server will work the same with all of them! 🎉

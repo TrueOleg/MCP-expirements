@@ -1,19 +1,19 @@
-# Использование DeepSeek с MCP Mac Apps Server
+# Using DeepSeek with MCP Mac Apps Server
 
-Есть несколько способов использовать DeepSeek с вашим MCP сервером для управления приложениями Mac:
+There are several ways to use DeepSeek with your MCP server for managing Mac applications:
 
-## Способ 1: DeepSeek Desktop App (рекомендуется)
+## Method 1: DeepSeek Desktop App (Recommended)
 
-Если у DeepSeek есть официальное desktop-приложение с поддержкой MCP:
+If DeepSeek has an official desktop application with MCP support:
 
-1. **Установите DeepSeek Desktop App** из App Store или с официального сайта
+1. **Install DeepSeek Desktop App** from App Store or official website
 
-2. **Найдите файл конфигурации MCP**. Обычно он находится в:
-   - `~/Library/Application Support/DeepSeek/mcp.json` или
-   - `~/.deepseek/mcp.json` или
-   - В настройках приложения DeepSeek
+2. **Find MCP Configuration File**. Usually located at:
+   - `~/Library/Application Support/DeepSeek/mcp.json` or
+   - `~/.deepseek/mcp.json` or
+   - In DeepSeek application settings
 
-3. **Добавьте конфигурацию MCP сервера**:
+3. **Add MCP Server Configuration**:
 
 ```json
 {
@@ -26,18 +26,18 @@
 }
 ```
 
-4. **Перезапустите DeepSeek** для применения изменений
+4. **Restart DeepSeek** to apply changes
 
-## Способ 2: Через Claude Desktop с DeepSeek API
+## Method 2: Via Claude Desktop with DeepSeek API
 
-Если DeepSeek поддерживает API, совместимый с OpenAI, можно использовать Claude Desktop:
+If DeepSeek supports API compatible with OpenAI, you can use Claude Desktop:
 
-1. **Установите Claude Desktop** (если еще не установлен)
+1. **Install Claude Desktop** (if not already installed)
 
-2. **Найдите файл конфигурации Claude Desktop**:
+2. **Find Claude Desktop Configuration File**:
    - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
 
-3. **Добавьте конфигурацию**:
+3. **Add Configuration**:
 
 ```json
 {
@@ -50,23 +50,23 @@
 }
 ```
 
-4. **Настройте использование DeepSeek API** в Claude Desktop (если поддерживается)
+4. **Configure DeepSeek API Usage** in Claude Desktop (if supported)
 
-## Способ 3: Использование универсального MCP клиента
+## Method 3: Using Universal MCP Client
 
-Можно использовать любой MCP-совместимый клиент с DeepSeek:
+You can use any MCP-compatible client with DeepSeek:
 
-### Вариант 3.1: MCP Inspector / Playground
+### Option 3.1: MCP Inspector / Playground
 
-Если есть инструменты для тестирования MCP серверов, можно использовать их для проверки работы сервера.
+If there are tools for testing MCP servers, you can use them to verify server operation.
 
-### Вариант 3.2: Создание собственного клиента
+### Option 3.2: Creating Your Own Client
 
-Можно создать простой клиент на Node.js/TypeScript, который будет использовать DeepSeek API и наш MCP сервер.
+You can create a simple client in Node.js/TypeScript that will use DeepSeek API and our MCP server.
 
-## Проверка работы сервера
+## Server Verification
 
-Перед подключением к DeepSeek убедитесь, что сервер работает:
+Before connecting to DeepSeek, make sure the server is running:
 
 ```bash
 cd /Users/olegzaichkin/Documents/MCP
@@ -74,50 +74,49 @@ npm run build
 node dist/index.js
 ```
 
-Сервер должен запуститься и вывести сообщение "MCP Mac Apps Server запущен" в stderr.
+Server should start and output "MCP Mac Apps Server started" to stderr.
 
-## Тестирование через командную строку
+## Command Line Testing
 
-Вы можете протестировать MCP сервер напрямую, отправляя JSON-RPC сообщения:
+You can test the MCP server directly by sending JSON-RPC messages:
 
 ```bash
-# Тест списка инструментов
+# Test tool list
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node dist/index.js
 
-# Тест вызова инструмента
+# Test tool call
 echo '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"get_running_applications","arguments":{}}}' | node dist/index.js
 ```
 
-## Типичные проблемы и решения
+## Common Issues and Solutions
 
-### Проблема: Сервер не запускается
-**Решение**: Убедитесь, что:
-- Node.js версии 18+ установлен
-- Все зависимости установлены (`npm install`)
-- Проект собран (`npm run build`)
+### Issue: Server Won't Start
+**Solution**: Make sure that:
+- Node.js version 18+ is installed
+- All dependencies are installed (`npm install`)
+- Project is built (`npm run build`)
 
-### Проблема: DeepSeek не видит инструменты
-**Решение**: 
-- Проверьте, что путь к серверу в конфигурации правильный
-- Убедитесь, что DeepSeek перезапущен после изменения конфигурации
-- Проверьте логи DeepSeek на наличие ошибок
+### Issue: DeepSeek Doesn't See Tools
+**Solution**: 
+- Check that server path in configuration is correct
+- Make sure DeepSeek is restarted after configuration change
+- Check DeepSeek logs for errors
 
-### Проблема: Ошибки доступа к приложениям
-**Решение**: 
-- macOS может требовать разрешения в "Системные настройки → Конфиденциальность и безопасность → Управление компьютером"
-- Разрешите доступ для Terminal/Node.js
+### Issue: Application Access Errors
+**Solution**: 
+- macOS may require permissions in "System Settings → Privacy & Security → Automation"
+- Allow access for Terminal/Node.js
 
-## Альтернативный вариант: Интеграция через API
+## Alternative: API Integration
 
-Если DeepSeek имеет REST API, можно создать простой HTTP-обертку для MCP сервера, но это требует дополнительной разработки.
+If DeepSeek has a REST API, you can create a simple HTTP wrapper for the MCP server, but this requires additional development.
 
-## Где найти актуальную информацию
+## Where to Find Current Information
 
-- Официальная документация DeepSeek
+- Official DeepSeek documentation
 - [MCP Specification](https://modelcontextprotocol.io/)
-- Документация по вашему MCP клиенту
+- Documentation for your MCP client
 
 ---
 
-**Примечание**: Структура конфигурации может отличаться в зависимости от версии DeepSeek и типа клиента. Сверьтесь с официальной документацией DeepSeek для актуальной информации.
-
+**Note**: Configuration structure may differ depending on DeepSeek version and client type. Refer to official DeepSeek documentation for current information.

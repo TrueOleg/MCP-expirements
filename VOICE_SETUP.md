@@ -1,243 +1,242 @@
-# Настройка голосового управления приложениями через MCP
+# Voice Control Setup for Applications via MCP
 
-## 🎤 Что это?
+## 🎤 What is This?
 
-`voice_client.py` - голосовой клиент, который позволяет управлять приложениями Mac голосовыми командами, используя Ollama для понимания и MCP инструменты для выполнения действий.
+`voice_client.py` - a voice client that allows you to control Mac applications with voice commands, using Ollama for understanding and MCP tools for executing actions.
 
-## 🚀 Быстрая установка
+## 🚀 Quick Installation
 
-### 1. Установите необходимые библиотеки
+### 1. Install Required Libraries
 
 ```bash
-# Активируйте виртуальное окружение (если используете)
+# Activate virtual environment (if using)
 source venv/bin/activate
 
-# Установите библиотеки для голосового ввода
+# Install libraries for voice input
 pip install SpeechRecognition pyaudio
 
-# Для лучшего качества TTS (опционально)
+# For better TTS quality (optional)
 pip install pyttsx3
 ```
 
-**Примечание для macOS:**
-- `pyaudio` может потребовать установки PortAudio через Homebrew:
+**Note for macOS:**
+- `pyaudio` may require installing PortAudio via Homebrew:
   ```bash
   brew install portaudio
   pip install pyaudio
   ```
 
-### 2. Настройте разрешения
+### 2. Configure Permissions
 
-macOS может потребовать разрешения на использование микрофона:
-- Системные настройки → Конфиденциальность и безопасность → Микрофон
-- Разрешите доступ для Terminal/Python
+macOS may require microphone permissions:
+- System Settings → Privacy & Security → Microphone
+- Allow access for Terminal/Python
 
-### 3. Убедитесь, что все запущено
+### 3. Make Sure Everything is Running
 
 ```bash
-# Ollama должен быть запущен
+# Ollama should be running
 ollama serve
 
-# MCP сервер должен быть собран
+# MCP server should be built
 npm run build
 ```
 
-## 📝 Использование
+## 📝 Usage
 
-### Запуск голосового клиента
+### Starting Voice Client
 
 ```bash
 python3 voice_client.py
 ```
 
-### Примеры голосовых команд
+### Voice Command Examples
 
-**Открытие приложений:**
-- "Открой Calculator"
-- "Открой Safari"
-- "Запусти TextEdit"
+**Opening Applications:**
+- "Open Calculator"
+- "Open Safari"
+- "Launch TextEdit"
 
-**Закрытие приложений:**
-- "Закрой Calculator"
-- "Закрой Safari"
-- "Выйди из приложения Telegram"
+**Closing Applications:**
+- "Close Calculator"
+- "Close Safari"
+- "Quit Telegram application"
 
-**Информация:**
-- "Какие приложения запущены?"
-- "Покажи список приложений"
+**Information:**
+- "What applications are running?"
+- "Show list of applications"
 
-**Выход:**
-- "Выход"
-- "Стоп"
+**Exit:**
+- "Exit"
+- "Stop"
 
-## ⚙️ Настройка
+## ⚙️ Configuration
 
-### Изменение модели Ollama
+### Changing Ollama Model
 
-В файле `voice_client.py`:
+In `voice_client.py` file:
 
 ```python
-OLLAMA_MODEL = "llama3.2"  # Измените на свою модель
+OLLAMA_MODEL = "llama3.2"  # Change to your model
 ```
 
-### Отключение голосового ввода (только текст)
+### Disabling Voice Input (Text Only)
 
-Если не хотите использовать микрофон, просто не устанавливайте `SpeechRecognition` и `pyaudio`. Клиент автоматически переключится на текстовый ввод.
+If you don't want to use a microphone, simply don't install `SpeechRecognition` and `pyaudio`. The client will automatically switch to text input.
 
-### Использование другого TTS
+### Using Different TTS
 
-По умолчанию используется встроенная macOS команда `say`. Можно использовать `pyttsx3` для большего контроля:
+By default, the built-in macOS `say` command is used. You can use `pyttsx3` for more control:
 
 ```python
-# В функции speak() измените use_system=False
+# In speak() function change use_system=False
 speak(text, use_system=False)
 ```
 
-## 🔧 Как это работает
+## 🔧 How It Works
 
-1. **Голосовой ввод**: Микрофон записывает вашу речь
-2. **Распознавание речи**: Google Speech Recognition преобразует речь в текст (требует интернет)
-3. **Понимание команд**: Ollama анализирует текст и определяет нужный MCP инструмент
-4. **Выполнение действия**: MCP инструмент выполняет действие (открывает/закрывает приложение)
-5. **Голосовой ответ**: Результат озвучивается через macOS `say`
+1. **Voice Input**: Microphone records your speech
+2. **Speech Recognition**: Google Speech Recognition converts speech to text (requires internet)
+3. **Command Understanding**: Ollama analyzes text and determines the needed MCP tool
+4. **Action Execution**: MCP tool executes action (opens/closes application)
+5. **Voice Response**: Result is spoken via macOS `say`
 
-## 🌐 Офлайн распознавание речи
+## 🌐 Offline Speech Recognition
 
-По умолчанию используется Google Speech Recognition (требует интернет). Для офлайн работы можно использовать:
+By default, Google Speech Recognition is used (requires internet). For offline work, you can use:
 
-### Вариант 1: Whisper (OpenAI)
+### Option 1: Whisper (OpenAI)
 
 ```bash
 pip install openai-whisper
 ```
 
-Затем в `voice_client.py` измените функцию `listen()`:
+Then in `voice_client.py` modify the `listen()` function:
 
 ```python
 import whisper
 
 def listen():
     model = whisper.load_model("base")
-    # ... код для записи аудио ...
+    # ... code for recording audio ...
     result = model.transcribe(audio_file)
     return result["text"]
 ```
 
-### Вариант 2: Встроенное macOS распознавание (через AppleScript)
+### Option 2: Built-in macOS Recognition (via AppleScript)
 
-Можно использовать встроенное распознавание macOS через AppleScript, но это более сложно.
+You can use built-in macOS recognition via AppleScript, but this is more complex.
 
-## 🐛 Устранение проблем
+## 🐛 Troubleshooting
 
-### Ошибка: "No module named 'speech_recognition'"
+### Error: "No module named 'speech_recognition'"
 
-**Решение:**
+**Solution:**
 ```bash
 pip install SpeechRecognition
 ```
 
-### Ошибка при установке pyaudio
+### Error Installing pyaudio
 
-**Решение (macOS):**
+**Solution (macOS):**
 ```bash
 brew install portaudio
 pip install pyaudio
 ```
 
-### Микрофон не работает
+### Microphone Not Working
 
-**Решение:**
-1. Проверьте разрешения: Системные настройки → Конфиденциальность → Микрофон
-2. Проверьте, что микрофон подключен и работает
-3. Попробуйте запустить через Terminal (не через IDE)
+**Solution:**
+1. Check permissions: System Settings → Privacy → Microphone
+2. Check that microphone is connected and working
+3. Try running through Terminal (not through IDE)
 
-### "Не удалось распознать речь"
+### "Could Not Recognize Speech"
 
-**Причины:**
-- Слишком тихая речь
-- Фоновый шум
-- Нет интернета (для Google Speech Recognition)
+**Causes:**
+- Speech too quiet
+- Background noise
+- No internet (for Google Speech Recognition)
 
-**Решения:**
-- Говорите четче и громче
-- Уменьшите фоновый шум
-- Используйте офлайн распознавание (Whisper)
+**Solutions:**
+- Speak clearer and louder
+- Reduce background noise
+- Use offline recognition (Whisper)
 
-### Голосовой вывод не работает
+### Voice Output Not Working
 
-**Решение:**
-Проверьте, что macOS команда `say` работает:
+**Solution:**
+Check that macOS `say` command works:
 ```bash
-say "Тест"
+say "Test"
 ```
 
-Если не работает, установите `pyttsx3`:
+If it doesn't work, install `pyttsx3`:
 ```bash
 pip install pyttsx3
 ```
 
-## 💡 Советы по использованию
+## 💡 Usage Tips
 
-1. **Говорите четко**: Произносите команды четко и достаточно громко
-2. **Используйте точные названия**: "Calculator", "Safari" (с большой буквы)
-3. **Короткие команды**: Лучше работают короткие, прямые команды
-4. **Тишина между командами**: Дайте время системе обработать команду перед следующей
+1. **Speak Clearly**: Pronounce commands clearly and loud enough
+2. **Use Exact Names**: "Calculator", "Safari" (with capital letter)
+3. **Short Commands**: Short, direct commands work better
+4. **Silence Between Commands**: Give the system time to process a command before the next one
 
-## 📊 Сравнение с текстовым клиентом
+## 📊 Comparison with Text Client
 
-| Возможность | voice_client.py | mcp_client.py |
-|------------|-----------------|---------------|
-| Голосовой ввод | ✅ | ❌ |
-| Голосовой вывод | ✅ | ❌ |
-| Текстовый ввод | ✅ | ✅ |
-| Простота | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
-| Требует интернет | Да (для STT) | Нет |
-| Микрофон | Требуется | Не требуется |
+| Feature | voice_client.py | mcp_client.py |
+|---------|-----------------|---------------|
+| Voice Input | ✅ | ❌ |
+| Voice Output | ✅ | ❌ |
+| Text Input | ✅ | ✅ |
+| Simplicity | ⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Requires Internet | Yes (for STT) | No |
+| Microphone | Required | Not required |
 
-## 🔐 Конфиденциальность
+## 🔐 Privacy
 
-**Важно:**
-- Google Speech Recognition отправляет аудио на серверы Google для обработки
-- Если это проблема, используйте офлайн распознавание (Whisper)
-- Все остальное (Ollama, MCP) работает локально
+**Important:**
+- Google Speech Recognition sends audio to Google servers for processing
+- If this is a concern, use offline recognition (Whisper)
+- Everything else (Ollama, MCP) works locally
 
-## 🎯 Примеры использования
+## 🎯 Usage Examples
 
-### Базовое использование
+### Basic Usage
 
 ```bash
 python3 voice_client.py
-# Говорите: "Открой Calculator"
-# Calculator открывается
-# Система отвечает: "Приложение Calculator успешно запущено"
+# Say: "Open Calculator"
+# Calculator opens
+# System responds: "Application Calculator successfully launched"
 ```
 
-### Непрерывная работа
+### Continuous Operation
 
-Клиент работает в цикле, позволяя давать множество команд подряд:
-- "Открой Safari"
-- "Открой Calculator"
-- "Какие приложения запущены?"
-- "Закрой Calculator"
-- "Выход"
+The client works in a loop, allowing you to give multiple commands in a row:
+- "Open Safari"
+- "Open Calculator"
+- "What applications are running?"
+- "Close Calculator"
+- "Exit"
 
-## 🚀 Продвинутое использование
+## 🚀 Advanced Usage
 
-### Кастомные команды
+### Custom Commands
 
-Вы можете расширить список команд, добавив обработку в `ask_ollama_with_tools()`.
+You can extend the command list by adding handling in `ask_ollama_with_tools()`.
 
-### Интеграция с другими сервисами
+### Integration with Other Services
 
-Можно добавить интеграцию с:
-- Календарем (создание событий)
-- Напоминаниями
-- Музыкой (контроль воспроизведения)
-- И т.д.
+You can add integration with:
+- Calendar (creating events)
+- Reminders
+- Music (playback control)
+- And more
 
-## 📚 Дополнительные ресурсы
+## 📚 Additional Resources
 
-- [SpeechRecognition документация](https://github.com/Uberi/speech_recognition)
-- [Whisper (офлайн STT)](https://github.com/openai/whisper)
+- [SpeechRecognition documentation](https://github.com/Uberi/speech_recognition)
+- [Whisper (offline STT)](https://github.com/openai/whisper)
 - [pyttsx3 (TTS)](https://pyttsx3.readthedocs.io/)
-

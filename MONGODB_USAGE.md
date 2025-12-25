@@ -1,104 +1,104 @@
-# Работа с MongoDB через голосовые команды
+# Working with MongoDB via Voice Commands
 
-## 🎉 Новые возможности
+## 🎉 New Features
 
-Теперь вы можете управлять MongoDB через голосовые команды! Поддерживаются все основные операции с базами данных, коллекциями и документами.
+Now you can manage MongoDB through voice commands! All basic operations with databases, collections, and documents are supported.
 
-## 🚀 Быстрый старт
+## 🚀 Quick Start
 
-### 1. Убедитесь, что MongoDB запущен
+### 1. Make Sure MongoDB is Running
 
 ```bash
-# Проверьте, что MongoDB запущен
+# Check that MongoDB is running
 mongosh --eval "db.adminCommand('ping')"
 
-# Если не запущен, запустите (зависит от вашей установки)
-# brew services start mongodb-community  # для Homebrew
+# If not running, start it (depends on your installation)
+# brew services start mongodb-community  # for Homebrew
 ```
 
-### 2. Настройте connection string (опционально)
+### 2. Configure Connection String (Optional)
 
-По умолчанию используется `mongodb://localhost:27017`. Если нужно изменить:
+By default, `mongodb://localhost:27017` is used. If you need to change it:
 
 ```bash
 export MONGODB_URI="mongodb://your-connection-string"
 ```
 
-### 3. Пересоберите MCP сервер
+### 3. Rebuild MCP Server
 
 ```bash
 npm run build
 ```
 
-## 📝 Примеры голосовых команд
+## 📝 Voice Command Examples
 
-### Открытие MongoDB Compass
-
-```
-"Открой MongoDB Compass"
-```
-
-### Работа с базами данных
+### Opening MongoDB Compass
 
 ```
-"Создай базу данных test"
-"Покажи список баз данных"
+"Open MongoDB Compass"
 ```
 
-### Работа с коллекциями
+### Working with Databases
 
 ```
-"Создай коллекцию users в базе test"
-"Покажи коллекции в базе test"
-"Удали коллекцию users из базы test"
+"Create database test"
+"Show list of databases"
 ```
 
-### Работа с документами
+### Working with Collections
 
 ```
-"Добавь документ {"name": "John", "age": 30} в коллекцию users базы test"
-"Найди все документы в коллекции users базы test"
-"Найди документы с name John в коллекции users базы test"
-"Удали документ с name John из коллекции users базы test"
+"Create collection users in database test"
+"Show collections in database test"
+"Delete collection users from database test"
 ```
 
-## 🎤 Полный пример использования
+### Working with Documents
+
+```
+"Add document {"name": "John", "age": 30} to collection users in database test"
+"Find all documents in collection users in database test"
+"Find documents with name John in collection users in database test"
+"Delete document with name John from collection users in database test"
+```
+
+## 🎤 Complete Usage Example
 
 ```bash
 python3 voice_client.py
 ```
 
-Затем говорите команды:
+Then speak commands:
 
-1. **"Открой MongoDB Compass"** - откроет MongoDB Compass
-2. **"Создай базу данных testdb"** - создаст базу данных
-3. **"Создай коллекцию users в базе testdb"** - создаст коллекцию
-4. **"Добавь документ {"name": "Alice", "email": "alice@example.com"} в коллекцию users базы testdb"**
-5. **"Найди все документы в коллекции users базы testdb"** - покажет все документы
-6. **"Удали документ с name Alice из коллекции users базы testdb"**
+1. **"Open MongoDB Compass"** - opens MongoDB Compass
+2. **"Create database testdb"** - creates database
+3. **"Create collection users in database testdb"** - creates collection
+4. **"Add document {"name": "Alice", "email": "alice@example.com"} to collection users in database testdb"**
+5. **"Find all documents in collection users in database testdb"** - shows all documents
+6. **"Delete document with name Alice from collection users in database testdb"**
 
-## 📋 Доступные инструменты MongoDB
+## 📋 Available MongoDB Tools
 
-### Базы данных
+### Databases
 
-- **`mongodb_create_database`** - Создать базу данных
-- **`mongodb_list_databases`** - Список всех баз данных
+- **`mongodb_create_database`** - Create database
+- **`mongodb_list_databases`** - List all databases
 
-### Коллекции
+### Collections
 
-- **`mongodb_create_collection`** - Создать коллекцию
-- **`mongodb_list_collections`** - Список коллекций в базе
-- **`mongodb_delete_collection`** - Удалить коллекцию
+- **`mongodb_create_collection`** - Create collection
+- **`mongodb_list_collections`** - List collections in database
+- **`mongodb_delete_collection`** - Delete collection
 
-### Документы
+### Documents
 
-- **`mongodb_insert_document`** - Вставить документ
-- **`mongodb_find_documents`** - Найти документы (с фильтром)
-- **`mongodb_delete_document`** - Удалить документ(ы) по фильтру
+- **`mongodb_insert_document`** - Insert document
+- **`mongodb_find_documents`** - Find documents (with filter)
+- **`mongodb_delete_document`** - Delete document(s) by filter
 
-## 🔧 Примеры JSON для документов
+## 🔧 JSON Examples for Documents
 
-При добавлении документов используйте JSON формат:
+When adding documents, use JSON format:
 
 ```
 {"name": "John", "age": 30, "city": "Moscow"}
@@ -106,45 +106,44 @@ python3 voice_client.py
 {"_id": "custom-id", "data": "some data"}
 ```
 
-## ⚠️ Важные замечания
+## ⚠️ Important Notes
 
-1. **Connection String**: По умолчанию `mongodb://localhost:27017`. Для MongoDB Atlas или других серверов используйте переменную окружения `MONGODB_URI`.
+1. **Connection String**: Default is `mongodb://localhost:27017`. For MongoDB Atlas or other servers, use the `MONGODB_URI` environment variable.
 
-2. **Формат JSON**: При использовании голосовых команд, Ollama автоматически преобразует вашу речь в JSON. Для сложных структур может потребоваться несколько попыток.
+2. **JSON Format**: When using voice commands, Ollama automatically converts your speech to JSON. For complex structures, multiple attempts may be needed.
 
-3. **Безопасность**: Убедитесь, что MongoDB настроен правильно с точки зрения безопасности, особенно если доступен извне.
+3. **Security**: Make sure MongoDB is properly configured from a security perspective, especially if accessible externally.
 
-4. **Фильтры**: При поиске и удалении документов используйте JSON фильтры:
-   - Все документы: `{}` (пустой объект)
-   - По полю: `{"name": "John"}`
-   - С условиями: `{"age": {"$gt": 18}}`
+4. **Filters**: When searching and deleting documents, use JSON filters:
+   - All documents: `{}` (empty object)
+   - By field: `{"name": "John"}`
+   - With conditions: `{"age": {"$gt": 18}}`
 
-## 🐛 Устранение проблем
+## 🐛 Troubleshooting
 
-### Ошибка подключения к MongoDB
+### Connection Error to MongoDB
 
-**Решение:**
+**Solution:**
 ```bash
-# Проверьте, что MongoDB запущен
+# Check that MongoDB is running
 mongosh --eval "db.adminCommand('ping')"
 
-# Проверьте connection string
+# Check connection string
 echo $MONGODB_URI
 ```
 
-### База данных не создается
+### Database Not Created
 
-MongoDB создает базу данных автоматически при первом добавлении данных. Инструмент `mongodb_create_database` создает временную коллекцию для инициализации базы.
+MongoDB creates databases automatically when first data is added. The `mongodb_create_database` tool creates a temporary collection to initialize the database.
 
-### Не удается распознать команду
+### Command Not Recognized
 
-Используйте более простые формулировки:
-- ✅ "Создай базу test"
-- ✅ "Добавь в коллекцию users документ {"name": "John"}"
-- ❌ "Мне нужно создать базу данных с названием test и добавить туда коллекцию"
+Use simpler formulations:
+- ✅ "Create database test"
+- ✅ "Add to collection users document {"name": "John"}"
+- ❌ "I need to create a database named test and add a collection there"
 
-## 📚 Дополнительные ресурсы
+## 📚 Additional Resources
 
 - [MongoDB Documentation](https://www.mongodb.com/docs/)
 - [MongoDB Node.js Driver](https://www.mongodb.com/docs/drivers/node/current/)
-
